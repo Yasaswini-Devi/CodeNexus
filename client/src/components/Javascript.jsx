@@ -84,11 +84,11 @@ useEffect(()=>{
 
   const copyContent = ()=>{
     navigator.clipboard.writeText(code);
-    toast.success("Copied to Clipboard")
+    toast.success("Copied")
   }
  
   const codeToFile = ()=>{
-    toast.success("Download Started");
+    toast.success("File is Downloading...");
 
     const text = document.querySelector(".dartpython").value;
     const blob = new Blob([text],{type:"text/javascript"});
@@ -113,12 +113,8 @@ useEffect(()=>{
                     <div className='jsleftheaderfile jsfile'>
                       <mark><h2>index.js</h2></mark>
                       <div className='runbtn'>
-                      <button className='vbtn'>
-                      <img className='voicebtn' onClick={copyContent}  alt='CopyClip'/>
-                      </button>
-                      <button className='vbtn'>
-                      <img className='voicebtn' onClick={codeToFile}  alt='DownLoadCode'/>
-                      </button>
+                      <button className='vbtn' onClick={copyContent}>Copy</button>
+                      <button className='vbtn' onClick={codeToFile}>Download</button>
                         <button className='btn btn1' onClick={runCode}>RUN</button>
                       </div>
                     </div>

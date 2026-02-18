@@ -1,0 +1,1 @@
+CodeNexus is a platform which works as a code editor for languages like HTML, CSS, Javascript, Python.

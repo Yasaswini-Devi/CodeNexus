@@ -8,10 +8,10 @@ function LangList(props) {
     <div className="LangContainer">
             <div className="langSection languages">
                 <div className="languageBorder" style={{'backgroundColor':`${props.leftcolorjs}`}}>
-                        <NavLink to="/editor/javascript">Js</NavLink>
+                        <NavLink to="/javascript">Js</NavLink>
                 </div>
                 <div className="languageBorder" style={{'backgroundColor':`${props.leftcolorhtml}`}}>
-                        <NavLink to="/editor/html">HTML, CSS</NavLink>
+                        <NavLink to="/html">HTML, CSS</NavLink>
                 </div>
                 <div className="languageBorder" style={{'backgroundColor':`${props.leftcolorpy}`}}>
                         <NavLink to="/python">Python</NavLink>

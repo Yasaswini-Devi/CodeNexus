@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import LangList from './LangList';
-// import copy_icon from '../../assets/copy_icon.gif';
-// import download_icon from '../../assets/download_logo.png';
 import { toast } from 'react-hot-toast';
 
 const data = new Date()

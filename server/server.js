@@ -4,10 +4,13 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
-    credentials: true
-}));
+// Allow requests from any dev frontend (5173, 5174, etc.)
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // This will now work because pythonRoutes exports a Router function

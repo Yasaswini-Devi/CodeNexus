@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import AppLayout from './components/AppLayout'
 import LandingPage from './components/LandingPage'
 import Javascript from './components/Javascript'   
 import Html from './components/Html'
@@ -11,12 +11,14 @@ function App() {
   return (
     <>
       <Router>
-          <Routes>
-            <Route path='/' element={<LandingPage />} />
-            <Route path='/javascript' element={<Javascript />} />
-            <Route path='/python' element={<Python />} />
-            <Route path='/html' element={<Html />} />
-          </Routes>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/javascript" element={<Javascript />} />
+            <Route path="/python" element={<Python />} />
+            <Route path="/html" element={<Html />} />
+          </Route>
+        </Routes>
       </Router>
     </>
   )

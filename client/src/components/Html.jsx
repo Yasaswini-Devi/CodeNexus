@@ -24,7 +24,6 @@ function Html() {
     
     html_code.current.onkeyup = () => run();
     css_code.current.onkeyup = () => run();
-
     run_button.current.onclick = () => jsrun();
 
     html_code.current.value = localStorage.html_code;

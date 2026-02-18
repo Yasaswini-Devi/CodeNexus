@@ -1,0 +1,488 @@
+/* ===== GLOBAL RESET & VARIABLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --accent-blue: #58a6ff;
+    --accent-green: #3fb950;
+    --accent-purple: #bc8cff;
+    --accent-orange: #f78166;
+    --accent-yellow: #e3b341;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --border-color: #30363d;
+  }
+  
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+  
+  /* ===== LANDING PAGE ===== */
+  .landingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+    background: var(--bg-primary);
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(88, 166, 255, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(188, 140, 255, 0.15) 0%, transparent 60%);
+  }
+  
+  .landingInfo {
+    text-align: center;
+    padding: 3rem;
+    animation: fadeInUp 0.8s ease;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .landingInfo h1 {
+    font-size: 6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .landingInfo p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  
+  /* ===== LANG LIST SIDEBAR ===== */
+  .LangContainer {
+    height: 100%;
+  }
+  
+  .langSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0.3rem;
+  }
+  
+  .languageBorder {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+  }
+  
+  .languageBorder:hover {
+    transform: translateX(4px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px rgba(88, 166, 255, 0.3);
+  }
+  
+  .languageBorder a {
+    display: block;
+    padding: 0.6rem 0.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--bg-tertiary);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  .languageBorder a:hover,
+  .languageBorder a.active {
+    background: var(--bg-secondary);
+    color: var(--accent-blue);
+  }
+  
+  /* ===== COMMON EDITOR LAYOUT ===== */
+  .wholeeditorBody {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: var(--bg-primary);
+    overflow: hidden;
+  }
+  
+  .leftLang {
+    width: 90px;
+    min-width: 90px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 0.8rem 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .PlaygroundMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  
+  /* ===== RUN HEADER ===== */
+  .runHeaderJS {
+    display: flex;
+    align-items: center;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.4rem 1rem;
+    gap: 1rem;
+    height: 45px;
+    min-height: 45px;
+    flex-shrink: 0;
+  }
+  
+  .jsfile {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex: 1;
+  }
+  
+  .jsleftheaderfile {
+    flex: 1;
+  }
+  
+  .jsleftheaderfile mark,
+  .jsrightheaderfile mark {
+    background: transparent;
+    color: var(--accent-blue);
+  }
+  
+  .jsleftheaderfile h2 {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .jsrightheaderfile {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border-color);
+  }
+  
+  .jsrightheaderfile p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    letter-spacing: 1px;
+  }
+  
+  .runbtn {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  /* ===== BUTTONS ===== */
+  .btn {
+    background: var(--accent-green);
+    color: #000;
+    border: none;
+    padding: 0.4rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+  }
+  
+  .btn:hover {
+    background: #4fd860;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(63, 185, 80, 0.4);
+  }
+  
+  .vbtn {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .vbtn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    transform: translateY(-1px);
+  }
+  
+  .clear {
+    background: transparent;
+    color: var(--accent-orange);
+    border: 1px solid var(--accent-orange);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .clear:hover {
+    background: rgba(247, 129, 102, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .jsrunbtn {
+    background: var(--accent-green);
+    color: #000;
+    border: none;
+    padding: 0.3rem 0.9rem;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .jsrunbtn:hover {
+    background: #4fd860;
+    box-shadow: 0 3px 10px rgba(63, 185, 80, 0.4);
+  }
+  
+  /* ===== JS / PYTHON PLAYGROUND ===== */
+  .jsplayground,
+  .playground {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 45px);
+    overflow: hidden;
+  }
+  
+  .snippet {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .leftplayground {
+    border-right: 1px solid var(--border-color);
+  }
+  
+  /* ===== TEXTAREAS ===== */
+  .dartpython {
+    width: 100%;
+    flex: 1;
+    height: 100%;
+    background: var(--bg-primary);
+    color: #a9d7f0;
+    border: none;
+    padding: 1.2rem;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    caret-color: var(--accent-blue);
+    letter-spacing: 0.3px;
+  }
+  
+  .dartpython::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+  
+  /* ===== OUTPUT PANEL ===== */
+  #consoleOutput {
+    width: 100%;
+    height: 100%;
+    background: #0a0e14;
+    color: var(--accent-green);
+    padding: 1.2rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    overflow-y: auto;
+  }
+  
+  #consoleOutput p {
+    margin: 0.2rem 0;
+    padding: 0.1rem 0;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  
+  /* ===== HTML EDITOR ===== */
+  /* matches: voiceContainer > voiceBody.wholeeditorBody */
+  .voiceContainer {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  /* matches: voiceBody.wholeeditorBody */
+  .voiceBody {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  /* matches: voicePlayground */
+  .voicePlayground {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  
+  /* matches: htmlcodeEditor */
+  .htmlcodeEditor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* TOP: 3 editors - takes 55% */
+  .editormain {
+    display: flex;
+    height: 55%;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-bottom: 2px solid var(--accent-blue);
+  }
+  
+  /* each editor panel */
+  .codemaincode {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden;
+    min-width: 0;
+    width: 0; /* forces equal width */
+  }
+  
+  .codemaincode:last-child {
+    border-right: none;
+  }
+  
+  .webeditorheading {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 0.45rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .codemaincode textarea {
+    flex: 1;
+    width: 100%;
+    background: var(--bg-primary);
+    color: #a9d7f0;
+    border: none;
+    padding: 1rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    caret-color: var(--accent-blue);
+  }
+  
+  /* BOTTOM: iframe preview - takes remaining 45% */
+  #result {
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 45%;        /* matches remaining space */
+    background: #fff;
+    display: block;
+    flex-shrink: 0;
+  }
+  
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+  
+  /* ===== UTILITY ===== */
+  .invisible {
+    display: none !important;
+  }
+  
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .leftLang {
+      width: 70px;
+      min-width: 70px;
+    }
+  
+    .landingInfo h1 {
+      font-size: 3rem;
+    }
+  
+    .editormain {
+      flex-direction: column;
+      height: 60%;
+    }
+  
+    #result {
+      height: 40%;
+    }
+  }

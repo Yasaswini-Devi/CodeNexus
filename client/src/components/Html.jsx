@@ -1,34 +1,42 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
+import CodeEditor from './CodeEditor';
 
 function Html() {
-  const html_code = useRef(null);
-  const css_code = useRef(null);
-  const js_code = useRef(null);
-  const result = useRef(null); 
+  const result = useRef(null);
+  const [htmlCode, setHtmlCode] = useState('');
+  const [cssCode, setCssCode] = useState('');
+  const [jsCode, setJsCode] = useState('');
   const run_button = useRef(null);
   
   useEffect(() => {
-    const run = () => { 
-      localStorage.setItem('html_code', html_code.current.value);
-      localStorage.setItem('css_code', css_code.current.value);
-      result.current.contentDocument.body.innerHTML = `<style>${localStorage.css_code}</style>`+localStorage.html_code;
-      }
-    const jsrun = ()=>{
-      toast.success('Saved');
-      localStorage.setItem('js_code', js_code.current.value);
-      result.current.contentWindow.eval(localStorage.js_code);
-    
-    }
-    
-    html_code.current.onkeyup = () => run();
-    css_code.current.onkeyup = () => run();
-    run_button.current.onclick = () => jsrun();
+    const run = () => {
+      localStorage.setItem('html_code', htmlCode);
+      localStorage.setItem('css_code', cssCode);
+      result.current.contentDocument.body.innerHTML = `<style>${cssCode}</style>` + htmlCode;
+    };
 
-    html_code.current.value = localStorage.html_code;
-    css_code.current.value = localStorage.css_code;
-    js_code.current.value = localStorage.js_code;
+    const jsrun = () => {
+      toast.success('Saved');
+      localStorage.setItem('js_code', jsCode);
+      try {
+        result.current.contentWindow.eval(jsCode || '');
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    // Initialize from localStorage
+    setHtmlCode(localStorage.html_code || '');
+    setCssCode(localStorage.css_code || '');
+    setJsCode(localStorage.js_code || '');
+
+    // run when html/css change
+    // small debounce would be nicer but keep simple
+    run();
+
+    run_button.current.onclick = () => jsrun();
   }, []);
 
   
@@ -45,15 +53,16 @@ function Html() {
               <div className="editormain">
                 <div className="html-code codemaincode">
                   <h1 className='webeditorheading'> HTML</h1>
-                  <textarea data-testid="htmlTextarea" ref={html_code}></textarea>
+                  <CodeEditor language="html" value={htmlCode} onChange={setHtmlCode} height="180px" />
                 </div>
                 <div className="css-code codemaincode">
                   <h1 className='webeditorheading'>CSS</h1>
-                  <textarea data-testid="cssTextarea" ref={css_code}></textarea>
+                  <CodeEditor language="css" value={cssCode} onChange={setCssCode} height="180px" />
                 </div>
                 <div className="js-code codemaincode">
                   <h1 className='webeditorheading'>JavaScript <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button> </h1>
-                  <textarea spellCheck='false' ref={js_code}></textarea>
+                  <CodeEditor language="javascript" value={jsCode} onChange={setJsCode} height="180px" />
+                  <div style={{marginTop:6}}><button onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code: htmlCode + '\n\n/* JS */\n' + jsCode, language:'html+js'}})) }}>AI Assist</button></div>
                 </div>
               </div>
               <h1 className="invisible"><mark>Output</mark></h1>

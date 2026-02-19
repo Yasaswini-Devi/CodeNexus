@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
+import CodeEditor from './CodeEditor';
 
 const data = new Date()
 let DayName;
@@ -37,8 +38,7 @@ function Javascript() {
   const runCode = ()=>{
       try{
         toast.success("Code Execution Started")
-        let textCode = document.querySelector(".dartpython").value;
-        eval(textCode);
+        eval(code);
       }
       catch(err){
         toast.error("Please Enter Valid Code")
@@ -90,8 +90,7 @@ useEffect(()=>{
   const codeToFile = ()=>{
     toast.success("Download Started");
 
-    const text = document.querySelector(".dartpython").value;
-    const blob = new Blob([text],{type:"text/javascript"});
+    const blob = new Blob([code],{type:"text/javascript"});
 
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
@@ -120,6 +119,7 @@ useEffect(()=>{
                       <img className='voicebtn' onClick={codeToFile}  alt='DownLoadCode'/>
                       </button>
                         <button className='btn btn1' onClick={runCode}>RUN</button>
+                        <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'javascript'}})) }}>AI Assist</button>
                       </div>
                     </div>
                     <div className='jsrightheaderfile jsfile'>
@@ -129,7 +129,7 @@ useEffect(()=>{
                   </div>
                   <div className='jsplayground playground'>
                     <div className='leftplayground snippet'>
-                      <textarea className='dartpython' data-testid="jsTextarea" name="javascript" id="javascript" value={code} onChange={(e)=>setcode(e.target.value)} placeholder='console.log("Hello CodeNexus");'></textarea>
+                      <CodeEditor language="javascript" value={code} onChange={setcode} height="360px" />
                     </div>
                     <h1 className="invisible">
                       <mark>Output</mark>

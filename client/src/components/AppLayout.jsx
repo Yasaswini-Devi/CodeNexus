@@ -1,5 +1,15 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { useEffect, useState } from 'react';
+import AIAssistant from './AIAssistant';
+
+function ThemeToggle(){
+  const [theme,setTheme] = useState(localStorage.getItem('cn_theme') || 'light');
+  useEffect(()=>{ document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('cn_theme', theme); },[theme]);
+  return (
+    <button onClick={()=>setTheme(t=> t === 'light' ? 'dark' : 'light')} className='themeToggle'>Theme</button>
+  );
+}
 
 function TopNavLink({ to, children, end }) {
   return (
@@ -43,12 +53,16 @@ export default function AppLayout() {
             <TopNavLink to="/javascript">JavaScript</TopNavLink>
             <TopNavLink to="/python">Python</TopNavLink>
             <TopNavLink to="/html">HTML/CSS</TopNavLink>
+            <div style={{display:'inline-block',marginLeft:12}}>
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </header>
       <main className="appMain">
         <Outlet />
       </main>
+      <AIAssistant />
     </div>
   )
 }

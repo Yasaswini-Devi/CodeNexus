@@ -1,6 +1,7 @@
 import React,{ useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
+import CodeEditor from './CodeEditor';
 
 
 function Python() {
@@ -42,8 +43,7 @@ function Python() {
 
   const clear = ()=>{
     toast.success('Output Cleared')
-    const box = document.querySelector("#consoleOutput p");
-    box.innerText = "";
+    setOutput('');
   }
 
   const copyContent = ()=>{
@@ -53,9 +53,7 @@ function Python() {
 
   const codeToFile = ()=>{
     toast.success('File is Downloading...')
-    const text = document.querySelector('#python').value;
-    
-    const blob = new Blob([text],{type:"text/python"});
+    const blob = new Blob([code],{type:"text/python"});
 
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
@@ -78,6 +76,7 @@ function Python() {
                         <button className='vbtn' onClick={copyContent}>Copy</button>
                         <button className='vbtn' onClick={codeToFile}>Download</button>
                         <button className='btn' onClick={handleSubmit}>RUN</button>
+                        <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'python'}})) }}>AI Assist</button>
                       </div>
                     </div>
                     <div className='jsrightheaderfile jsfile'>
@@ -87,7 +86,7 @@ function Python() {
                   </div>
                   <div className='jsplayground playground'>
                     <div className='leftplayground snippet'>
-                    <textarea className='dartpython' name="python" id="python" value={code} onChange={(e)=>setCode(e.target.value)} placeholder='print("hello")'></textarea>
+                    <CodeEditor language="python" value={code} onChange={setCode} height="360px" />
                     </div>
                     <h1 className="invisible">
                       <mark>Output</mark>

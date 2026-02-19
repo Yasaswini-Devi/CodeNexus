@@ -20,7 +20,7 @@ const executepy = (filepath) => {
     return new Promise((resolve, reject) => {
         const uniqueName = path.basename(filepath).split(".")[0];
         const wayName = path.join(__dirname, "../python_runner");
-        exec(`cd ${wayName} && python3 ${uniqueName}.py`, (error, stdout, stderr) => {
+        exec(`cd ${wayName} && python ${uniqueName}.py`, (error, stdout, stderr) => {
             if (error) reject(error);
             else if (stderr) reject(stderr);
             else resolve(stdout);

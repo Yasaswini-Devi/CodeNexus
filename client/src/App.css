@@ -3,6 +3,12 @@
   --topnav-h: 56px;
 }
 
+* {
+  transition: background-color 0.25s ease,
+              color 0.25s ease,
+              border-color 0.25s ease;
+}
+
 .appRoot {
   height: 100vh;
   width: 100vw;
@@ -13,10 +19,16 @@
 
 .topNav {
   height: var(--topnav-h);
-  background: rgba(13, 17, 23, 0.72);
-  border-bottom: 1px solid rgba(48, 54, 61, 0.8);
+  background: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(12px);
 }
+
+[data-theme="light"] .topNav {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+}
+
 
 .topNavInner {
   height: 100%;
@@ -55,6 +67,28 @@
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+/* ===== THEME TOGGLE BUTTON ===== */
+.theme-btn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.12s ease,
+              border-color 0.12s ease,
+              background 0.12s ease,
+              color 0.12s ease;
+}
+
+.theme-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-blue);
+  background: rgba(88, 166, 255, 0.12);
 }
 
 .topNavLink {
@@ -101,8 +135,8 @@
     width: 100vw;
     background: var(--bg-primary);
     background-image: 
-      radial-gradient(ellipse at 20% 50%, rgba(88, 166, 255, 0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 50%, rgba(188, 140, 255, 0.15) 0%, transparent 60%);
+      radial-gradient(circle at 30% 40%, rgba(88,166,255,0.08), transparent 55%),
+  radial-gradient(circle at 70% 60%, rgba(188,140,255,0.08), transparent 55%);
   }
   
   .landingInfo {
@@ -140,6 +174,11 @@
     line-height: 1.7;
   }
 
+  [data-theme="light"] .landingSub {
+  color: #4b5563;
+}
+
+
   .landingActions {
     display: flex;
     gap: 10px;
@@ -176,8 +215,9 @@
   }
 
   .ctaGhost {
-    background: rgba(33, 38, 45, 0.7);
-    color: var(--text-primary);
+    background: var(--card-bg);
+  	border: 1px solid var(--soft-border);
+  	box-shadow: var(--soft-shadow);
   }
 
   .landingCards {
@@ -188,20 +228,24 @@
   }
 
   .landingCard {
-    text-align: left;
-    padding: 14px 14px;
-    border-radius: 14px;
-    background: rgba(22, 27, 34, 0.65);
-    border: 1px solid rgba(48, 54, 61, 0.8);
-    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
-    min-height: 88px;
-  }
+  text-align: left;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--soft-border);
+  box-shadow: var(--soft-shadow);
+  transition: transform 0.15s ease,
+              box-shadow 0.15s ease,
+              background 0.15s ease;
+  min-height: 88px;
+}
 
-  .landingCard:hover {
-    transform: translateY(-2px);
-    border-color: rgba(88, 166, 255, 0.5);
-    background: rgba(22, 27, 34, 0.85);
-  }
+.landingCard:hover {
+  transform: translateY(-3px);
+  background: var(--card-hover);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+}
+
 
   .landingCardTitle {
     font-weight: 900;
@@ -209,8 +253,7 @@
     margin-bottom: 6px;
   }
 
-  .landingCardBody {
-    color: var(--text-secondary);
+  .landingCardBody {    color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.5;
   }
@@ -465,7 +508,7 @@
   #consoleOutput {
     width: 100%;
     height: 100%;
-    background: #0a0e14;
+    background: var(--bg-primary);
     color: var(--accent-green);
     padding: 1.2rem;
     font-family: 'Fira Code', 'Consolas', monospace;

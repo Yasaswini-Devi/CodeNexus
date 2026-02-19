@@ -13,7 +13,7 @@ function TopNavLink({ to, children, end }) {
   )
 }
 
-export default function AppLayout() {
+export default function AppLayout({theme, setTheme}) {
   return (
     <div className="appRoot">
       <Toaster
@@ -43,6 +43,15 @@ export default function AppLayout() {
             <TopNavLink to="/javascript">JavaScript</TopNavLink>
             <TopNavLink to="/python">Python</TopNavLink>
             <TopNavLink to="/html">HTML/CSS</TopNavLink>
+			<button
+	  		  className="theme-btn"
+	 		  onClick={() =>
+				  setTheme(theme === "dark" ? "light" : "dark")
+			  }
+	  		>
+	  			{theme === "dark" ? "☀" : "🌙"}
+	  		</button>
+
           </nav>
         </div>
       </header>

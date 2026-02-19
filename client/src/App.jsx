@@ -1,18 +1,31 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react' 
 import AppLayout from './components/AppLayout'
 import LandingPage from './components/LandingPage'
-import Javascript from './components/Javascript'   
+import Javascript from './components/Javascript'
 import Html from './components/Html'
-import Python from './components/Python'    
+import Python from './components/Python'
 import './App.css'
 
+
 function App() {
+
+	// ===== THEME STATE =====
+  const [theme, setTheme] = useState(
+    localStorage.getItem("theme") || "dark"
+  );
+
+  // ===== APPLY THEME =====
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   return (
     <>
       <Router>
         <Routes>
-          <Route element={<AppLayout />}>
+          <Route element={<AppLayout theme={theme} setTheme={setTheme} />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/javascript" element={<Javascript />} />
             <Route path="/python" element={<Python />} />
@@ -25,3 +38,4 @@ function App() {
 }
 
 export default App
+

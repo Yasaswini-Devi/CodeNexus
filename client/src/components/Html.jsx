@@ -31,6 +31,41 @@ function Html() {
     js_code.current.value = localStorage.js_code;
   }, []);
 
+	const handleShare = async () => {
+		  try {
+   			 const response = await fetch("http://localhost:5000/api/share", {
+     		 method: "POST",
+     		 headers: {
+       			 "Content-Type": "application/json",
+     		 },
+     		 body: JSON.stringify({
+       			 code: `
+	${html_code.current.value}
+
+	<style>
+	${css_code.current.value}
+	</style>
+
+	<script>
+	${js_code.current.value}
+	</script>
+    	     `,
+       		 language: "html",
+     	 }),
+   	 });
+
+    const data = await response.json();
+
+    const shareLink = `${window.location.origin}/share/${data.id}`;
+
+    await navigator.clipboard.writeText(shareLink);
+
+    alert("✅ Share link copied!");
+  } catch (err) {
+    console.error(err);
+    alert("Share failed");
+  }
+};
   
   return (
     <>
@@ -52,7 +87,7 @@ function Html() {
                   <textarea data-testid="cssTextarea" ref={css_code}></textarea>
                 </div>
                 <div className="js-code codemaincode">
-                  <h1 className='webeditorheading'>JavaScript <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button> </h1>
+                  <h1 className='webeditorheading'>JavaScript <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button> <button className='jsrunbtn' onClick={handleShare} > share </button>  </h1>
                   <textarea spellCheck='false' ref={js_code}></textarea>
                 </div>
               </div>

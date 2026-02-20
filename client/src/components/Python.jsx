@@ -40,6 +40,32 @@ function Python() {
     }
   }
 
+	const handleShare = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/api/share", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: code,
+        language: "python",
+      }),
+    });
+
+    const data = await response.json();
+
+    const shareLink = `${window.location.origin}/share/${data.id}`;
+
+    await navigator.clipboard.writeText(shareLink);
+
+    toast.success("Share link copied!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Sharing failed");
+  }
+};
+
   const clear = ()=>{
     toast.success('Output Cleared')
     const box = document.querySelector("#consoleOutput p");
@@ -77,6 +103,7 @@ function Python() {
                       <div className='runbtn'>
                         <button className='vbtn' onClick={copyContent}>Copy</button>
                         <button className='vbtn' onClick={codeToFile}>Download</button>
+	  					<button className='vbtn' onClick={handleShare}>Share</button>
                         <button className='btn' onClick={handleSubmit}>RUN</button>
                       </div>
                     </div>

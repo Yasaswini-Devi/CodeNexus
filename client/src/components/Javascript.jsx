@@ -46,7 +46,33 @@ function Javascript() {
       }
 };
 
+const handleShare = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/api/share", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: code,          // your state variable
+        language: "javascript",
+      }),
+    });
 
+    const data = await response.json();
+
+    const shareLink = `${window.location.origin}/share/${data.id}`;
+
+    await navigator.clipboard.writeText(shareLink);
+
+    toast.success("Share link copied!");
+    console.log("Share Link:", shareLink);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Sharing failed");
+  }
+};
 
 const originalConsoleLog = console.log;
 
@@ -115,6 +141,7 @@ useEffect(()=>{
                       <div className='runbtn'>
                       <button className='vbtn' onClick={copyContent}>Copy</button>
                       <button className='vbtn' onClick={codeToFile}>Download</button>
+	  					<button className='vbtn' onClick={handleShare}>Share</button>
                         <button className='btn btn1' onClick={runCode}>RUN</button>
                       </div>
                     </div>

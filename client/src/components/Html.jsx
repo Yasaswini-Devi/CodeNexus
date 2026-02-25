@@ -11,13 +11,23 @@ function Html() {
   const run_button = useRef(null);
   
   useEffect(() => {
-    const run = () => {
-      localStorage.setItem('html_code', htmlCode);
-      localStorage.setItem('css_code', cssCode);
-      result.current.contentDocument.body.innerHTML = `<style>${cssCode}</style>` + htmlCode;
-    };
+  const run = () => {
+    if (!result.current || !result.current.contentDocument) return;
 
-    const jsrun = () => {
+    localStorage.setItem('html_code', htmlCode);
+    localStorage.setItem('css_code', cssCode);
+    
+    // Update the iframe content
+    result.current.contentDocument.body.innerHTML = 
+      `<style>${cssCode}</style>` + htmlCode;
+  };
+
+  run();
+
+  // Attach the JS run button
+  const currentBtn = run_button.current;
+  if (currentBtn) {
+    currentBtn.onclick = () => {
       toast.success('Saved');
       localStorage.setItem('js_code', jsCode);
       try {
@@ -26,18 +36,10 @@ function Html() {
         console.error(e);
       }
     };
+  }
 
-    // Initialize from localStorage
-    setHtmlCode(localStorage.html_code || '');
-    setCssCode(localStorage.css_code || '');
-    setJsCode(localStorage.js_code || '');
-
-    // run when html/css change
-    // small debounce would be nicer but keep simple
-    run();
-
-    run_button.current.onclick = () => jsrun();
-  }, []);
+  // ADD THE DEPENDENCIES HERE:
+}, [htmlCode, cssCode, jsCode]);
 
   
   return (

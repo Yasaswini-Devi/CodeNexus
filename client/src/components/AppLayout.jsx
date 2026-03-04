@@ -3,18 +3,18 @@ import { Toaster } from 'react-hot-toast'
 import { useEffect, useState } from 'react';
 import AIAssistant from './AIAssistant';
 
-function ThemeToggle(){
-  const [theme,setTheme] = useState(localStorage.getItem('cn_theme') || 'light');
-  useEffect(()=>{ document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('cn_theme', theme); },[theme]);
-  
+function ThemeToggle() {
+  const [theme, setTheme] = useState(localStorage.getItem('cn_theme') || 'light');
+  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('cn_theme', theme); }, [theme]);
+
   const toggleTheme = () => {
     setTheme(t => t === 'light' ? 'dark' : 'light');
   };
-  
+
   return (
-    <button 
-      onClick={toggleTheme} 
-      className='themeToggle' 
+    <button
+      onClick={toggleTheme}
+      className='themeToggle'
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
       <span className="themeIcon">
@@ -39,7 +39,7 @@ function TopNavLink({ to, children, end }) {
   )
 }
 
-export default function AppLayout() {
+export default function AppLayout({ theme, setTheme }) {
   return (
     <div className="appRoot">
       <Toaster
@@ -69,7 +69,7 @@ export default function AppLayout() {
             <TopNavLink to="/javascript">JavaScript</TopNavLink>
             <TopNavLink to="/python">Python</TopNavLink>
             <TopNavLink to="/html">HTML/CSS</TopNavLink>
-            <div style={{display:'inline-block',marginLeft:12}}>
+            <div style={{ display: 'inline-block', marginLeft: 12 }}>
               <ThemeToggle />
             </div>
           </nav>

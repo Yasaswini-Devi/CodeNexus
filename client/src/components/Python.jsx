@@ -102,7 +102,7 @@ function Python() {
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>
                     <button className='copyDownloadBtn' title='Download code' onClick={codeToFile}>⬇️ Download</button>
-                    <button className='vbtn' onClick={handleShare}>Share</button>
+                    <button className='copyDownloadBtn' title='Share code' onClick={handleShare}>🔗 Share</button>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                     <button className='btn' onClick={handleSubmit}>RUN</button>

@@ -106,7 +106,7 @@ function Html() {
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <button className='copyDownloadBtn' title='Copy All Code' onClick={() => { navigator.clipboard.writeText(htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode); toast.success('Code copied to clipboard!'); }}>📋 Copy</button>
                       <button className='copyDownloadBtn' title='Download All Code' onClick={() => { const blob = new Blob([htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode], { type: 'text/plain' }); const link = document.createElement('a'); link.href = window.URL.createObjectURL(blob); link.download = 'code.txt'; link.click(); toast.success('Download started!'); }}>⬇️ Download</button>
-                      <button className='vbtn' onClick={handleShare}>Share</button>
+                      <button className='copyDownloadBtn' title='Share Code' onClick={handleShare}>🔗 Share</button>
                       <div style={{ display: 'flex', gap: '6px', marginLeft: '4px' }}>
                         <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button>
                         <button className='vbtn' onClick={() => { window.dispatchEvent(new CustomEvent('openAssistant', { detail: { code: htmlCode + '\n\n/* JS */\n' + jsCode, language: 'html+js' } })) }}>AI Assist</button>

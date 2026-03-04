@@ -11,7 +11,7 @@ CodeNexus is a lightweight, browser-based coding playground with multiple “edi
 ## Tech stack
 
 - **Client**: React + Vite + React Router + Monaco Editor (`client/`)
-- **Server**: Node.js + Express + CORS (`server/`)
+- **Server**: Node.js + Express + CORS + Mongoose (`server/`)
 - **Python execution**: server-side `python3` process (writes files to `server/python_runner/`)
 - **AI Assistant**: LLM proxy (supports Ollama and other HTTP-based model APIs)
 
@@ -20,7 +20,10 @@ CodeNexus is a lightweight, browser-based coding playground with multiple “edi
 - **`client/`**: UI (React/Vite)
   - **`src/components/CodeEditor.jsx`**: Monaco editor wrapper for syntax highlighting
   - **`src/components/AIAssistant.jsx`**: AI assistant modal with curated prompts
+  - **`src/components/AIAssistant.css`**: AI assistant specific styles
   - **`src/components/AppLayout.jsx`**: Main app layout with theme toggle
+  - **`src/components/LandingPage.jsx`**: Welcome page and feature overview
+  - **`src/components/LangList.jsx`**: Component displaying available language editors
   - **`src/components/Python.jsx`**, **`Javascript.jsx`**, **`Html.jsx`**: Editor playgrounds
   - **`src/App.jsx`**, **`index.css`**, **`App.css`**: App routing and styles
   
@@ -70,6 +73,7 @@ Open the Vite dev URL (typically **`http://localhost:5173`**).
 
 ## New features added
 
+- **Client-Side Routing**: Added `react-router-dom` to support navigation between the Landing Page and individual language playgrounds (e.g., `/javascript`, `/python`).
 - **Monaco editor**: Textareas were replaced with the Monaco editor for a much richer editing experience (syntax highlighting, line numbers, word wrap).
 - **Theme switcher**: Toggle light/dark themes using the `Theme` button in the top-right. Theme preference is persisted to `localStorage`.
 - **AI Assistant (experimental)**: An AI assistant panel is available (click the `AI Assist` button in any editor or open it via the top-right assistant). It sends prompts to a configurable model API running separately and displays the model's response.

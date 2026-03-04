@@ -33,7 +33,7 @@ else{
 
 function Javascript() {
 
-  const [code,setcode] = useState("");
+  const [code,setcode] = useState('');
 
   const runCode = ()=>{
       try{
@@ -54,11 +54,11 @@ useEffect(()=>{
   const consoleOutput = document.getElementById('consoleOutput');
   const btn = document.querySelector('.btn1');
 
-  const consoleLoghandler = function(message){
+  const consoleLoghandler = function(...args){
     const paragraph = document.createElement('p');
-    paragraph.textContent = message;
+    paragraph.textContent = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
     consoleOutput.appendChild(paragraph);
-    originalConsoleLog.apply(console);
+    originalConsoleLog.apply(console, args);
   };
 
   btn.addEventListener('click',()=>{
@@ -112,14 +112,14 @@ useEffect(()=>{
                     <div className='jsleftheaderfile jsfile'>
                       <mark><h2>index.js</h2></mark>
                       <div className='runbtn'>
-                      <button className='vbtn'>
-                      <img className='voicebtn' onClick={copyContent}  alt='CopyClip'/>
-                      </button>
-                      <button className='vbtn'>
-                      <img className='voicebtn' onClick={codeToFile}  alt='DownLoadCode'/>
-                      </button>
-                        <button className='btn btn1' onClick={runCode}>RUN</button>
-                        <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'javascript'}})) }}>AI Assist</button>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                          <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>
+                          <button className='copyDownloadBtn' title='Download code' onClick={codeToFile}>⬇️ Download</button>
+                        </div>
+                        <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+                          <button className='btn btn1' onClick={runCode}>RUN</button>
+                          <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'javascript'}})) }}>AI Assist</button>
+                        </div>
                       </div>
                     </div>
                     <div className='jsrightheaderfile jsfile'>
@@ -129,7 +129,9 @@ useEffect(()=>{
                   </div>
                   <div className='jsplayground playground'>
                     <div className='leftplayground snippet'>
-                      <CodeEditor language="javascript" value={code} onChange={setcode} height="360px" />
+                      <div className='editor-wrapper'>
+                        <CodeEditor language="javascript" value={code} onChange={setcode} />
+                      </div>
                     </div>
                     <h1 className="invisible">
                       <mark>Output</mark>

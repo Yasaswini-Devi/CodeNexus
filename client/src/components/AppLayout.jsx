@@ -6,8 +6,24 @@ import AIAssistant from './AIAssistant';
 function ThemeToggle(){
   const [theme,setTheme] = useState(localStorage.getItem('cn_theme') || 'light');
   useEffect(()=>{ document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('cn_theme', theme); },[theme]);
+  
+  const toggleTheme = () => {
+    setTheme(t => t === 'light' ? 'dark' : 'light');
+  };
+  
   return (
-    <button onClick={()=>setTheme(t=> t === 'light' ? 'dark' : 'light')} className='themeToggle'>Theme</button>
+    <button 
+      onClick={toggleTheme} 
+      className='themeToggle' 
+      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+    >
+      <span className="themeIcon">
+        {theme === 'light' ? '🌙' : '☀️'}
+      </span>
+      <span className="themeLabel">
+        {theme === 'light' ? 'Dark' : 'Light'}
+      </span>
+    </button>
   );
 }
 

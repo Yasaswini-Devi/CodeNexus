@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import './AIAssistant.css';
 
 const TEMPLATES = [
-  { id: 'explain', label: 'Explain code', template: 'Explain what the following code does in plain English:\n\n' },
-  { id: 'fix', label: 'Fix bugs', template: 'Find and fix bugs in the following code. Provide corrected code and a short explanation:\n\n' },
-  { id: 'tests', label: 'Write unit tests', template: 'Write unit tests for the following code (using pytest for Python or Jest for JS):\n\n' },
-  { id: 'opt', label: 'Optimize', template: 'Optimize and improve performance for the following code. Explain changes and provide improved code:\n\n' },
+  { id: 'explain', label: '💡 Explain code', template: 'Explain what the following code does in plain English:\n\n' },
+  { id: 'fix', label: '🐛 Fix bugs', template: 'Find and fix bugs in the following code. Provide corrected code and a short explanation:\n\n' },
+  { id: 'tests', label: '✅ Write unit tests', template: 'Write unit tests for the following code (using pytest for Python or Jest for JS):\n\n' },
+  { id: 'opt', label: '⚡ Optimize', template: 'Optimize and improve performance for the following code. Explain changes and provide improved code:\n\n' },
 ];
 
 export default function AIAssistant() {
@@ -14,6 +15,7 @@ export default function AIAssistant() {
   const [loading, setLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('explain');
   const [maxTokens, setMaxTokens] = useState(512);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -30,8 +32,25 @@ export default function AIAssistant() {
     const tmpl = TEMPLATES.find((t) => t.id === tmplId);
     if (!tmpl) return;
     setSelectedTemplate(tmplId);
-    // Prepend template to the existing content if not already present
-    setPrompt((p) => (p.startsWith(tmpl.template) ? p : tmpl.template + p));
+    
+    setPrompt((p) => {
+      // Extract the language header and code
+      const languageMatch = p.match(/^\/\/ language: [^\n]+\n\n/);
+      const languageHeader = languageMatch ? languageMatch[0] : '';
+      const codeOnly = p.replace(/^\/\/ language: [^\n]+\n\n/, '');
+      
+      // Remove any existing template text from code
+      let cleanCode = codeOnly;
+      for (const t of TEMPLATES) {
+        if (cleanCode.startsWith(t.template)) {
+          cleanCode = cleanCode.substring(t.template.length);
+          break;
+        }
+      }
+      
+      // Rebuild with new template
+      return languageHeader + tmpl.template + cleanCode;
+    });
   };
 
   const submit = async () => {
@@ -55,6 +74,8 @@ export default function AIAssistant() {
   const copyResult = async () => {
     try {
       await navigator.clipboard.writeText(resp);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (e) {
       // ignore
     }
@@ -63,26 +84,104 @@ export default function AIAssistant() {
   if (!open) return null;
 
   return (
-    <div className="aiModal" style={{position:'fixed',right:20,top:60,width:480,height:560,background:'#111',color:'#eee',border:'1px solid #333',padding:12,zIndex:9999}}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <strong>AI Assistant</strong>
-        <div>
-          <select value={selectedTemplate} onChange={(e)=>applyTemplate(e.target.value)}>
-            {TEMPLATES.map(t=> <option key={t.id} value={t.id}>{t.label}</option>)}
-          </select>
-          <input style={{width:80,marginLeft:8}} type="number" value={maxTokens} onChange={(e)=>setMaxTokens(e.target.value)} />
-          <button onClick={()=>{setOpen(false)}} style={{marginLeft:8}}>Close</button>
+    <div className="aiAssistantOverlay" onClick={() => setOpen(false)}>
+      <div className="aiAssistantModal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="aiModalHeader">
+          <div className="aiModalTitle">
+            <span className="aiIcon">✨</span>
+            <h2>AI Assistant</h2>
+          </div>
+          <button className="aiCloseBtn" onClick={() => setOpen(false)} title="Close">
+            ✕
+          </button>
         </div>
-      </div>
-      <textarea value={prompt} onChange={(e)=>setPrompt(e.target.value)} style={{width:'100%',height:200,marginTop:8,background:'#000',color:'#fff'}} />
-      <div style={{marginTop:8,display:'flex',gap:8}}>
-        <button onClick={submit} disabled={loading}>{loading? 'Thinking...' : 'Ask Model'}</button>
-        <button onClick={()=>{setPrompt('')}}>Clear</button>
-        <button onClick={()=>applyTemplate(selectedTemplate)}>Apply Template</button>
-        <button onClick={copyResult} disabled={!resp}>Copy Result</button>
-      </div>
-      <div style={{marginTop:12,overflowY:'auto',height:260,background:'#0b0b0b',padding:8}}>
-        <pre style={{whiteSpace:'pre-wrap',color:'#dfe'}}>{resp}</pre>
+
+        {/* Template Selection */}
+        <div className="aiTemplateSection">
+          <label>Quick Actions:</label>
+          <div className="aiTemplateGrid">
+            {TEMPLATES.map((tmpl) => (
+              <button
+                key={tmpl.id}
+                className={`aiTemplateBtn ${selectedTemplate === tmpl.id ? 'active' : ''}`}
+                onClick={() => applyTemplate(tmpl.id)}
+                title={tmpl.label}
+              >
+                {tmpl.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Input Section */}
+        <div className="aiInputSection">
+          <label>Your Code:</label>
+          <textarea
+            className="aiCodeInput"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Paste your code here..."
+          />
+        </div>
+
+        {/* Controls */}
+        <div className="aiControlsSection">
+          <div className="aiTokenControl">
+            <label htmlFor="maxTokens">Max Tokens:</label>
+            <input
+              id="maxTokens"
+              type="number"
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(e.target.value)}
+              min="10"
+              max="4096"
+              className="aiTokenInput"
+            />
+          </div>
+          <div className="aiActionButtons">
+            <button
+              className="aiBtn aiBtnPrimary"
+              onClick={submit}
+              disabled={loading || !prompt.trim()}
+            >
+              {loading ? '⏳ Thinking...' : '🚀 Ask AI'}
+            </button>
+            <button
+              className="aiBtn aiBtnSecondary"
+              onClick={() => setPrompt('')}
+              disabled={!prompt.trim()}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Output Section */}
+        <div className="aiOutputSection">
+          <div className="aiOutputHeader">
+            <label>Response:</label>
+            {resp && (
+              <button
+                className={`aiCopyBtn ${copied ? 'copied' : ''}`}
+                onClick={copyResult}
+                title="Copy to clipboard"
+              >
+                {copied ? '✓ Copied!' : '📋 Copy'}
+              </button>
+            )}
+          </div>
+          <div className="aiCodeOutput">
+            {resp ? (
+              <pre>{resp}</pre>
+            ) : (
+              <div className="aiEmptyState">
+                <span>💭</span>
+                <p>Your AI response will appear here</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

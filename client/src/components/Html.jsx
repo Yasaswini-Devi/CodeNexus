@@ -54,17 +54,32 @@ function Html() {
             <div className="htmlcodeEditor">
               <div className="editormain">
                 <div className="html-code codemaincode">
-                  <h1 className='webeditorheading'> HTML</h1>
-                  <CodeEditor language="html" value={htmlCode} onChange={setHtmlCode} height="180px" />
+                  <h1 className='webeditorheading'>📝 HTML</h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="html" value={htmlCode} onChange={setHtmlCode} />
+                  </div>
                 </div>
                 <div className="css-code codemaincode">
-                  <h1 className='webeditorheading'>CSS</h1>
-                  <CodeEditor language="css" value={cssCode} onChange={setCssCode} height="180px" />
+                  <h1 className='webeditorheading'>🎨 CSS</h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="css" value={cssCode} onChange={setCssCode} />
+                  </div>
                 </div>
                 <div className="js-code codemaincode">
-                  <h1 className='webeditorheading'>JavaScript <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button> </h1>
-                  <CodeEditor language="javascript" value={jsCode} onChange={setJsCode} height="180px" />
-                  <div style={{marginTop:6}}><button onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code: htmlCode + '\n\n/* JS */\n' + jsCode, language:'html+js'}})) }}>AI Assist</button></div>
+                  <h1 className='webeditorheading' style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'}}>
+                    <span>⚙️ JavaScript</span>
+                    <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                      <button className='copyDownloadBtn' title='Copy All Code' onClick={()=>{ navigator.clipboard.writeText(htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode); toast.success('Code copied to clipboard!'); }}>📋 Copy</button>
+                      <button className='copyDownloadBtn' title='Download All Code' onClick={()=>{ const blob = new Blob([htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode], {type:'text/plain'}); const link = document.createElement('a'); link.href = window.URL.createObjectURL(blob); link.download = 'code.txt'; link.click(); toast.success('Download started!'); }}>⬇️ Download</button>
+                      <div style={{display: 'flex', gap: '6px', marginLeft: '4px'}}>
+                        <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button>
+                        <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code: htmlCode + '\n\n/* JS */\n' + jsCode, language:'html+js'}})) }}>AI Assist</button>
+                      </div>
+                    </div>
+                  </h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="javascript" value={jsCode} onChange={setJsCode} />
+                  </div>
                 </div>
               </div>
               <h1 className="invisible"><mark>Output</mark></h1>

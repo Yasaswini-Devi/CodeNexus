@@ -73,10 +73,14 @@ function Python() {
                     <div className='jsleftheaderfile jsfile'>
                       <mark><h2>index.py</h2></mark>
                       <div className='runbtn'>
-                        <button className='vbtn' onClick={copyContent}>Copy</button>
-                        <button className='vbtn' onClick={codeToFile}>Download</button>
-                        <button className='btn' onClick={handleSubmit}>RUN</button>
-                        <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'python'}})) }}>AI Assist</button>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                          <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>
+                          <button className='copyDownloadBtn' title='Download code' onClick={codeToFile}>⬇️ Download</button>
+                        </div>
+                        <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+                          <button className='btn' onClick={handleSubmit}>RUN</button>
+                          <button className='vbtn' onClick={()=>{ window.dispatchEvent(new CustomEvent('openAssistant',{detail:{code,language:'python'}})) }}>AI Assist</button>
+                        </div>
                       </div>
                     </div>
                     <div className='jsrightheaderfile jsfile'>
@@ -86,7 +90,9 @@ function Python() {
                   </div>
                   <div className='jsplayground playground'>
                     <div className='leftplayground snippet'>
-                    <CodeEditor language="python" value={code} onChange={setCode} height="360px" />
+                      <div className='editor-wrapper'>
+                        <CodeEditor language="python" value={code} onChange={setCode} />
+                      </div>
                     </div>
                     <h1 className="invisible">
                       <mark>Output</mark>

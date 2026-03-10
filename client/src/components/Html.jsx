@@ -1,37 +1,82 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
+import CodeEditor from './CodeEditor';
 
 function Html() {
-  const html_code = useRef(null);
-  const css_code = useRef(null);
-  const js_code = useRef(null);
-  const result = useRef(null); 
+  const result = useRef(null);
+  const [htmlCode, setHtmlCode] = useState('');
+  const [cssCode, setCssCode] = useState('');
+  const [jsCode, setJsCode] = useState('');
   const run_button = useRef(null);
-  
+
   useEffect(() => {
-    const run = () => { 
-      localStorage.setItem('html_code', html_code.current.value);
-      localStorage.setItem('css_code', css_code.current.value);
-      result.current.contentDocument.body.innerHTML = `<style>${localStorage.css_code}</style>`+localStorage.html_code;
-      }
-    const jsrun = ()=>{
-      toast.success('Saved');
-      localStorage.setItem('js_code', js_code.current.value);
-      result.current.contentWindow.eval(localStorage.js_code);
-    
+    const run = () => {
+      if (!result.current || !result.current.contentDocument) return;
+
+      localStorage.setItem('html_code', htmlCode);
+      localStorage.setItem('css_code', cssCode);
+
+      // Update the iframe content
+      result.current.contentDocument.body.innerHTML =
+        `<style>${cssCode}</style>` + htmlCode;
+    };
+
+    run();
+
+    // Attach the JS run button
+    const currentBtn = run_button.current;
+    if (currentBtn) {
+      currentBtn.onclick = () => {
+        toast.success('Saved');
+        localStorage.setItem('js_code', jsCode);
+        try {
+          result.current.contentWindow.eval(jsCode || '');
+        } catch (e) {
+          console.error(e);
+        }
+      };
     }
-    
-    html_code.current.onkeyup = () => run();
-    css_code.current.onkeyup = () => run();
-    run_button.current.onclick = () => jsrun();
 
-    html_code.current.value = localStorage.html_code;
-    css_code.current.value = localStorage.css_code;
-    js_code.current.value = localStorage.js_code;
-  }, []);
+    // ADD THE DEPENDENCIES HERE:
+  }, [htmlCode, cssCode, jsCode]);
 
-  
+  const handleShare = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: `
+	${html_code.current.value}
+
+	<style>
+	${css_code.current.value}
+	</style>
+
+	<script>
+	${js_code.current.value}
+	</script>
+    	     `,
+          language: "html",
+        }),
+      });
+
+      const data = await response.json();
+
+      const shareLink = `${window.location.origin}/share/${data.id}`;
+
+      await navigator.clipboard.writeText(shareLink);
+
+      alert("✅ Share link copied!");
+    } catch (err) {
+      console.error(err);
+      alert("Share failed");
+    }
+  };
+
   return (
     <>
       <div className="voiceContainer">
@@ -44,16 +89,33 @@ function Html() {
             <div className="htmlcodeEditor">
               <div className="editormain">
                 <div className="html-code codemaincode">
-                  <h1 className='webeditorheading'> HTML</h1>
-                  <textarea data-testid="htmlTextarea" ref={html_code}></textarea>
+                  <h1 className='webeditorheading'>📝 HTML</h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="html" value={htmlCode} onChange={setHtmlCode} />
+                  </div>
                 </div>
                 <div className="css-code codemaincode">
-                  <h1 className='webeditorheading'>CSS</h1>
-                  <textarea data-testid="cssTextarea" ref={css_code}></textarea>
+                  <h1 className='webeditorheading'>🎨 CSS</h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="css" value={cssCode} onChange={setCssCode} />
+                  </div>
                 </div>
                 <div className="js-code codemaincode">
-                  <h1 className='webeditorheading'>JavaScript <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button> </h1>
-                  <textarea spellCheck='false' ref={js_code}></textarea>
+                  <h1 className='webeditorheading' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                    <span>⚙️ JavaScript</span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button className='copyDownloadBtn' title='Copy All Code' onClick={() => { navigator.clipboard.writeText(htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode); toast.success('Code copied to clipboard!'); }}>📋 Copy</button>
+                      <button className='copyDownloadBtn' title='Download All Code' onClick={() => { const blob = new Blob([htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode], { type: 'text/plain' }); const link = document.createElement('a'); link.href = window.URL.createObjectURL(blob); link.download = 'code.txt'; link.click(); toast.success('Download started!'); }}>⬇️ Download</button>
+                      <button className='copyDownloadBtn' title='Share Code' onClick={handleShare}>🔗 Share</button>
+                      <div style={{ display: 'flex', gap: '6px', marginLeft: '4px' }}>
+                        <button data-testid="runButton" ref={run_button} className='jsrunbtn'>RUN</button>
+                        <button className='vbtn' onClick={() => { window.dispatchEvent(new CustomEvent('openAssistant', { detail: { code: htmlCode + '\n\n/* JS */\n' + jsCode, language: 'html+js' } })) }}>AI Assist</button>
+                      </div>
+                    </div>
+                  </h1>
+                  <div className="editor-wrapper">
+                    <CodeEditor language="javascript" value={jsCode} onChange={setJsCode} />
+                  </div>
                 </div>
               </div>
               <h1 className="invisible"><mark>Output</mark></h1>

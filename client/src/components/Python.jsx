@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
 import CodeEditor from './CodeEditor';
+import { useSaveProject } from '../hooks/useSaveProject';
 
 function Python() {
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
+  const { saveProject, saving, loadedCode } = useSaveProject({ code, language: 'python' });
+
+  // Load project code when navigated from Dashboard
+  useEffect(() => { if (loadedCode !== null) setCode(loadedCode); }, [loadedCode]);
 
   const handleSubmit = async () => {
 
@@ -105,6 +110,7 @@ function Python() {
                     <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>
                     <button className='copyDownloadBtn' title='Download code' onClick={codeToFile}>⬇️ Download</button>
                     <button className='copyDownloadBtn' title='Share code' onClick={handleShare}>🔗 Share</button>
+                    <button className='copyDownloadBtn saveBtn' title='Save project' onClick={() => saveProject(code)} disabled={saving}>{saving ? '…' : '💾 Save'}</button>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                     <button className='btn' onClick={handleSubmit}>RUN</button>

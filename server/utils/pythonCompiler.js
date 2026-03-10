@@ -21,10 +21,13 @@ const generatefile = async (format, content) => {
 // Function to execute the .py file
 const executepy = (filepath) => {
     return new Promise((resolve, reject) => {
-        const uniqueName = path.basename(filepath).split(".")[0];
-        const wayName = path.join(__dirname, "../python_runner");
-        exec(`cd ${wayName} && python ${uniqueName}.py`, (error, stdout, stderr) => {
-            if (error) reject(error);
+        // Use the full absolute path so Python can always find the file
+        // Wrap in quotes to handle spaces in Windows paths (e.g. OneDrive)
+        exec(`python "${filepath}"`, { timeout: 10000 }, (error, stdout, stderr) => {
+            // Clean up temp file after execution
+            fs.unlink(filepath, () => { });
+
+            if (error) reject(error.message || error.toString());
             else if (stderr) reject(stderr);
             else resolve(stdout);
         });

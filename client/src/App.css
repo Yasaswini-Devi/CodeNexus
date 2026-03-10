@@ -141,6 +141,42 @@ html[data-theme="light"] .topNavLink.isActive {
   min-height: 0;
 }
 
+/* ===== PROJECT TITLE INPUT ===== */
+.projectTitleInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 2px 4px;
+  width: 250px;
+  transition: border-color 0.2s, background 0.2s;
+  border-radius: 4px 4px 0 0;
+}
+
+.projectTitleInput:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="light"] .projectTitleInput:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+}
+
+.projectTitleInput:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--accent);
+}
+
+html[data-theme="light"] .projectTitleInput:focus {
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--accent);
+}
+
 /* ===== LANDING PAGE ===== */
 .landingContainer {
   display: flex;

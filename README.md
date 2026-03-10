@@ -81,7 +81,7 @@ Open the Vite dev URL (typically **`http://localhost:5173`**).
 ## New features added
 
 - **User Authentication**: Secure JWT-based login and registration system. Users stay logged in (in-memory sessions) while using the app. Protected routes ensure unauthorized users cannot access the editors or dashboard.
-- **Cloud Projects Storage**: Each editor has a 'Save' button. Code is linked to your account and stored securely in MongoDB.
+- **Cloud Projects Storage & Custom Naming**: Save code to MongoDB. The editor top-bar features an inline editable text input to give projects custom names (or keep the smart auto-generated defaults).
 - **Dashboard ("My Projects")**: A grid view of all your saved projects. Click "Open" to jump back into a project exactly where you left off, or instantly delete old projects.
 - **Client-Side Routing**: Added `react-router-dom` to support navigation between the Landing Page, Dashboard, and individual language playgrounds.
 - **Monaco editor**: Textareas were replaced with the Monaco editor for a much richer editing experience (syntax highlighting, line numbers, word wrap).

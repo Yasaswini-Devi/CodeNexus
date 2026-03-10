@@ -28,7 +28,8 @@ Users can now save the code they write in the JavaScript, Python, or HTML/CSS ed
   - `GET /` to list all projects belonging *only* to the logged-in user.
   - `GET /:id` to fetch the specific code for a project.
   - `PUT /:id` and `DELETE /:id` to update and remove projects.
-- **Save Hook (`client/src/hooks/useSaveProject.js`)**: Built a custom React Hook that abstracts the save logic. It auto-generates a timestamped title completely bypassing blocked browser `window.prompt` dialogs, executes the POST/PUT request with the `Authorization: Bearer <token>` header, and manages loading state.
+- **Save Hook (`client/src/hooks/useSaveProject.js`)**: Built a custom React Hook that manages save state, JWT tokens, and exposes `projectTitle` state to the UI. It smart-defaults to a timestamp-based name but accepts user overrides.
+- **Custom Project Naming**: Replaced static editor filenames (`index.js` / `main.py`) with an inline, borderless `<input>` field bound directly to the save hook. This provides a seamless way to rename projects without disruptive popups or dialog boxes. 
 - **Editor Integration**: Added an explicit "💾 Save Project" button to the UI of every editor, mapped directly to the `useSaveProject` hook.
 
 ## 3. Project Dashboard

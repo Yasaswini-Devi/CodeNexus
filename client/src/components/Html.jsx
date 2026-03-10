@@ -13,7 +13,7 @@ function Html() {
 
   // Combined code string for saving
   const combinedCode = `<!-- HTML -->\n${htmlCode}\n\n/* CSS */\n${cssCode}\n\n/* JS */\n${jsCode}`;
-  const { saveProject, saving, loadedCode } = useSaveProject({ code: combinedCode, language: 'html' });
+  const { saveProject, saving, loadedCode, projectTitle, setProjectTitle } = useSaveProject({ code: combinedCode, language: 'html' });
 
   // When loading from Dashboard, split stored combined code back into parts
   useEffect(() => {
@@ -118,7 +118,17 @@ function Html() {
                 </div>
                 <div className="js-code codemaincode">
                   <h1 className='webeditorheading' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                    <span>⚙️ JavaScript</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>⚙️ JS</span>
+                      <input
+                        type="text"
+                        className="projectTitleInput"
+                        value={projectTitle}
+                        onChange={(e) => setProjectTitle(e.target.value)}
+                        placeholder="Project Name..."
+                        style={{ fontSize: '1rem', width: '200px' }}
+                      />
+                    </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <button className='copyDownloadBtn' title='Copy All Code' onClick={() => { navigator.clipboard.writeText(htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode); toast.success('Code copied to clipboard!'); }}>📋 Copy</button>
                       <button className='copyDownloadBtn' title='Download All Code' onClick={() => { const blob = new Blob([htmlCode + '\n\n/* CSS */\n' + cssCode + '\n\n/* JS */\n' + jsCode], { type: 'text/plain' }); const link = document.createElement('a'); link.href = window.URL.createObjectURL(blob); link.download = 'code.txt'; link.click(); toast.success('Download started!'); }}>⬇️ Download</button>

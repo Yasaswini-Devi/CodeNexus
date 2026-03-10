@@ -8,7 +8,7 @@ function Python() {
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
-  const { saveProject, saving, loadedCode } = useSaveProject({ code, language: 'python' });
+  const { saveProject, saving, loadedCode, projectTitle, setProjectTitle } = useSaveProject({ code, language: 'python' });
 
   // Load project code when navigated from Dashboard
   useEffect(() => { if (loadedCode !== null) setCode(loadedCode); }, [loadedCode]);
@@ -104,7 +104,15 @@ function Python() {
           <div className="PlaygroundMain">
             <div className='runHeaderJS'>
               <div className='jsleftheaderfile jsfile'>
-                <mark><h2>index.py</h2></mark>
+                <mark>
+                  <input
+                    type="text"
+                    className="projectTitleInput"
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    placeholder="Project Name..."
+                  />
+                </mark>
                 <div className='runbtn'>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>

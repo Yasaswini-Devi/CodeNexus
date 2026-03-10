@@ -12,7 +12,8 @@ export function useSaveProject({ code, language }) {
     const { user, token } = useAuth();
     const [saving, setSaving] = useState(false);
     const [projectId, setProjectId] = useState(null);
-    const [projectTitle, setProjectTitle] = useState('');
+    const defaultTitle = `${language[0].toUpperCase() + language.slice(1)} Project – ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}`;
+    const [projectTitle, setProjectTitle] = useState(defaultTitle);
 
     // Check if we were asked to load a project from the Dashboard
     useEffect(() => {
@@ -37,9 +38,6 @@ export function useSaveProject({ code, language }) {
             toast.error('Nothing to save — editor is empty');
             return;
         }
-
-        // Auto-generate a title if this is a new unsaved project
-        const defaultTitle = `${language[0].toUpperCase() + language.slice(1)} Project – ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}`;
         const title = projectTitle.trim() || defaultTitle;
 
         setSaving(true);
@@ -103,5 +101,5 @@ export function useSaveProject({ code, language }) {
             .catch(() => { });
     }, [projectId, token]);
 
-    return { saveProject, saving, loadedCode, projectTitle };
+    return { saveProject, saving, loadedCode, projectTitle, setProjectTitle };
 }

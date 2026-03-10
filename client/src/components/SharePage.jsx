@@ -6,7 +6,7 @@ export default function SharePage() {
   const [code, setCode] = useState("Loading...");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/share/${id}`)
+    fetch(`http://localhost:5001/api/share/${id}`)
       .then(res => res.json())
       .then(data => setCode(data.code))
       .catch(() => setCode("Failed to load code"));

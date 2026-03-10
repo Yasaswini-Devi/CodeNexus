@@ -17,7 +17,7 @@ function Python() {
     };
 
     try {
-      // ✅ Fetch from port 5000
+      // ✅ Fetch from port 5001
       const response = await fetch("http://localhost:5001/runpy", {
         method: 'POST',
 
@@ -45,7 +45,7 @@ function Python() {
 
   const handleShare = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/share", {
+      const response = await fetch("http://localhost:5001/api/share", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

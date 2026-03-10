@@ -57,7 +57,7 @@ export default function AIAssistant() {
     setLoading(true);
     setResp('');
     try {
-      const r = await fetch('http://localhost:5000/ai', {
+      const r = await fetch('http://localhost:5001/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, max_tokens: Number(maxTokens) }),

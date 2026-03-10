@@ -138,4 +138,3 @@ function Python() {
 }
 
 export default Python
->>>>>>> 6632901dd381e328995d29cb3a28558ba2fcec23

@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import './Dashboard.css';
 
-const LANG_ICONS = { javascript: '⚡', python: '🐍', html: '🌐' };
-const LANG_LABELS = { javascript: 'JavaScript', python: 'Python', html: 'HTML/CSS' };
-const LANG_ROUTES = { javascript: '/javascript', python: '/python', html: '/html' };
+const LANG_ICONS = { javascript: '⚡', python: '🐍', html: '🌐', ide: '📁' };
+const LANG_LABELS = { javascript: 'JavaScript', python: 'Python', html: 'HTML/CSS', ide: 'IDE Folder' };
+const LANG_ROUTES = { javascript: '/javascript', python: '/python', html: '/html', ide: '/ide' };
 
 const API = 'http://localhost:5001/api/projects';
 
@@ -50,6 +50,15 @@ export default function Dashboard() {
     useEffect(() => { if (token !== null) fetchProjects(); else setLoading(false); }, [fetchProjects, token]);
 
     const handleOpen = (project) => {
+        if (project.language === 'ide') {
+            sessionStorage.setItem('cn_load_ide_project', JSON.stringify({
+                id: project._id,
+                title: project.title,
+            }));
+            navigate('/ide');
+            return;
+        }
+
         // Store code in sessionStorage so the editor can pick it up
         sessionStorage.setItem('cn_load_project', JSON.stringify({
             id: project._id,

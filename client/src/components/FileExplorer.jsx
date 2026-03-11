@@ -64,7 +64,7 @@ export default function FileExplorer({ files, onSelectFile, activeFile, onOpenFo
       <div className="explorerTree">
         {files.length === 0 ? (
             <div style={{padding: '20px', textAlign: 'center', color: '#666', fontSize: '0.8rem'}}>
-                No folder open.<br/>Click <VscFolderOpened style={{verticalAlign: 'middle'}}/> to open.
+                No files yet.<br/>Create a file or open local folder.
             </div>
         ) : (
             files.map((node) => (

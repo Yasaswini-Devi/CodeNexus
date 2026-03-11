@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 // POST /api/projects  – create a new project
 router.post('/', async (req, res) => {
     try {
-        const { title, language, code } = req.body;
+        const { title, language, code, tree, activeFileId } = req.body;
         if (!language) return res.status(400).json({ error: 'Language is required' });
         console.log('POST /api/projects — user id:', req.user.id, '| lang:', language, '| title:', title);
 
@@ -37,6 +37,8 @@ router.post('/', async (req, res) => {
             title: title || 'Untitled Project',
             language,
             code: code || '',
+            tree: Array.isArray(tree) ? tree : [],
+            activeFileId: activeFileId || null,
         });
         console.log('  created project _id:', project._id);
 
@@ -62,10 +64,18 @@ router.get('/:id', async (req, res) => {
 // PUT /api/projects/:id  – update title or code
 router.put('/:id', async (req, res) => {
     try {
-        const { title, code } = req.body;
+        const { title, code, tree, activeFileId, language } = req.body;
+        const update = {
+            ...(title !== undefined && { title }),
+            ...(code !== undefined && { code }),
+            ...(tree !== undefined && { tree }),
+            ...(activeFileId !== undefined && { activeFileId }),
+            ...(language !== undefined && { language }),
+        };
+
         const project = await Project.findOneAndUpdate(
             { _id: req.params.id, owner: req.user.id },
-            { ...(title !== undefined && { title }), ...(code !== undefined && { code }) },
+            update,
             { returnDocument: 'after' }
         );
         if (!project) return res.status(404).json({ error: 'Project not found' });

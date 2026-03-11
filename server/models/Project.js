@@ -14,12 +14,20 @@ const projectSchema = new mongoose.Schema({
     },
     language: {
         type: String,
-        enum: ['javascript', 'python', 'html'],
+        enum: ['javascript', 'python', 'html', 'ide'],
         required: true,
     },
     code: {
         type: String,
         default: '',
+    },
+    tree: {
+        type: [mongoose.Schema.Types.Mixed],
+        default: [],
+    },
+    activeFileId: {
+        type: String,
+        default: null,
     },
 }, { timestamps: true });
 

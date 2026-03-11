@@ -1,67 +1,183 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import FileExplorer from './FileExplorer';
 import CodeEditor from './CodeEditor';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
 import { VscTrash } from 'react-icons/vsc';
+import { useAuth } from '../context/AuthContext';
+
+const PROJECTS_API = 'http://localhost:5001/api/projects';
 
 export default function IDEPage() {
+  const { token, user } = useAuth();
   const [files, setFiles] = useState([]);
   const [activeFile, setActiveFile] = useState(null);
   const [output, setOutput] = useState(""); 
   const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [projectId, setProjectId] = useState(null);
+  const [projectTitle, setProjectTitle] = useState('IDE Workspace');
+  const initializedRef = useRef(false);
 
-  // ... (handleOpenFolder code remains the same) ...
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!token) {
+        setFiles([]);
+        setActiveFile(null);
+        setLoading(false);
+        initializedRef.current = false;
+        setProjectId(null);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const raw = sessionStorage.getItem('cn_load_ide_project');
+        let targetProjectId = null;
+        if (raw) {
+          try {
+            targetProjectId = JSON.parse(raw)?.id || null;
+          } catch {
+            targetProjectId = null;
+          }
+          sessionStorage.removeItem('cn_load_ide_project');
+        }
+
+        if (!targetProjectId) {
+          const resList = await fetch(`${PROJECTS_API}?t=${Date.now()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          });
+          const listData = await resList.json();
+          if (resList.ok) {
+            const latestIdeProject = (listData.projects || []).find((project) => project.language === 'ide');
+            targetProjectId = latestIdeProject?._id || null;
+          }
+        }
+
+        if (!targetProjectId) {
+          setFiles([]);
+          setActiveFile(null);
+          setProjectId(null);
+          setProjectTitle('IDE Workspace');
+          initializedRef.current = true;
+          return;
+        }
+
+        const res = await fetch(`${PROJECTS_API}/${targetProjectId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load IDE project');
+
+        const project = data.project;
+        const tree = Array.isArray(project?.tree) ? project.tree : [];
+        setFiles(tree);
+        setProjectId(project?._id || null);
+        setProjectTitle(project?.title || 'IDE Workspace');
+
+        const selected = project?.activeFileId ? findNodeById(tree, project.activeFileId) : null;
+        setActiveFile(selected && !selected.isFolder ? selected : null);
+
+        initializedRef.current = true;
+      } catch (err) {
+        toast.error(err.message || 'Could not load IDE project');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [token]);
+
+  useEffect(() => {
+    if (!token || !initializedRef.current) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        if (files.length === 0 && !projectId) return;
+
+        if (projectId) {
+          await fetch(`${PROJECTS_API}/${projectId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              title: projectTitle,
+              tree: files,
+              activeFileId: activeFile?.id || null,
+              language: 'ide',
+            }),
+          });
+          return;
+        }
+
+        const titleFromTree = files[0]?.name ? `${files[0].name}` : `IDE Workspace - ${new Date().toLocaleDateString('en-IN')}`;
+        const res = await fetch(PROJECTS_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: titleFromTree,
+            language: 'ide',
+            tree: files,
+            activeFileId: activeFile?.id || null,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.project) {
+          setProjectId(data.project._id);
+          setProjectTitle(data.project.title || titleFromTree);
+        }
+      } catch {
+        toast.error('Failed to autosave IDE project');
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [files, activeFile?.id, token, projectId, projectTitle]);
+
   const handleOpenFolder = async () => {
+    if (!user || !token) {
+      toast.error('Please sign in to use cloud autosave');
+      return;
+    }
+
     try {
       const dirHandle = await window.showDirectoryPicker();
-      toast.loading("Loading folder...");
-      const fileTree = await buildFileTree(dirHandle);
-      setFiles(fileTree);
+      toast.loading('Loading local folder...');
+      const tree = await buildFileTree(dirHandle);
+      const sortedTree = sortTree(tree);
+      setProjectId(null);
+      setFiles(sortedTree);
+      setActiveFile(findFirstFile(sortedTree));
+      setProjectTitle(dirHandle.name || 'IDE Workspace');
       toast.dismiss();
-      toast.success(`Opened: ${dirHandle.name}`);
+      toast.success(`Opened ${dirHandle.name} and autosaving to cloud`);
     } catch (err) {
+      toast.dismiss();
       if (err.name !== 'AbortError') {
-        console.error(err);
-        toast.error("Failed to open folder.");
+        toast.error('Failed to open local folder');
       }
     }
   };
 
-  const buildFileTree = async (dirHandle) => {
-    const entries = [];
-    for await (const entry of dirHandle.values()) {
-      const id = crypto.randomUUID();
-      if (entry.kind === 'file') {
-        entries.push({ id, name: entry.name, isFolder: false, kind: 'file', handle: entry, language: detectLanguage(entry.name) });
-      } else if (entry.kind === 'directory') {
-        entries.push({ id, name: entry.name, isFolder: true, kind: 'directory', handle: entry, items: await buildFileTree(entry) });
-      }
-    }
-    return entries.sort((a,b) => (a.isFolder === b.isFolder ? 0 : a.isFolder ? -1 : 1));
-  };
-
-  // ... (handleSelectFile code remains the same) ...
   const handleSelectFile = async (fileNode) => {
     if (fileNode.isFolder) return;
     setOutput("");
     setShowPreview(false);
-    let content = fileNode.content || '';
-    if (fileNode.handle && !fileNode.contentLoaded) {
-      try {
-        const file = await fileNode.handle.getFile();
-        content = await file.text();
-        fileNode.content = content; 
-        fileNode.contentLoaded = true;
-      } catch (e) {
-        toast.error("Could not read file");
-      }
-    }
-    setActiveFile({ ...fileNode, content });
+    setActiveFile({ ...fileNode, content: fileNode.content || '' });
   };
 
-  // ... (Create File/Folder Logic remains the same) ...
   const handleCreateFile = () => {
+    if (!user || !token) {
+      toast.error('Please sign in to use cloud workspace');
+      return;
+    }
     const name = prompt("Enter file name (e.g. script.js):");
     if (!name) return;
     const newFile = { id: crypto.randomUUID(), name, isFolder: false, content: "", language: detectLanguage(name) };
@@ -70,6 +186,10 @@ export default function IDEPage() {
   };
 
   const handleCreateFolder = () => {
+    if (!user || !token) {
+      toast.error('Please sign in to use cloud workspace');
+      return;
+    }
     const name = prompt("Enter folder name:");
     if (!name) return;
     const newFolder = { id: crypto.randomUUID(), name, isFolder: true, items: [] };
@@ -77,23 +197,23 @@ export default function IDEPage() {
   };
 
   const handleCodeChange = (newContent) => {
-    setActiveFile(prev => ({ ...prev, content: newContent }));
+    setActiveFile(prev => {
+      if (!prev) return prev;
+      return { ...prev, content: newContent };
+    });
+
+    setFiles(prev => updateNodeById(prev, activeFile?.id, (node) => ({
+      ...node,
+      content: newContent,
+      language: node.language || detectLanguage(node.name),
+    })));
   };
 
-  // ✅ UPDATED DELETE FUNCTION: Works for both Tab and Sidebar
   const handleDelete = (targetNode = activeFile) => {
     if (!targetNode) return;
     if (!window.confirm(`Delete ${targetNode.name}?`)) return;
 
-    const deleteNodeRecursive = (nodes) => {
-        return nodes.filter(node => {
-            if (node.id === targetNode.id) return false;
-            if (node.items) node.items = deleteNodeRecursive(node.items);
-            return true;
-        });
-    };
-
-    setFiles(prev => deleteNodeRecursive(prev));
+    setFiles(prev => deleteNodeRecursive(prev, targetNode.id));
     if (activeFile && targetNode.id === activeFile.id) {
         setActiveFile(null);
     }
@@ -183,12 +303,16 @@ export default function IDEPage() {
           onOpenFolder={handleOpenFolder}
           onCreateFile={handleCreateFile}
           onCreateFolder={handleCreateFolder}
-          onDeleteItem={handleDelete} // ✅ Connected sidebar delete
+          onDeleteItem={handleDelete}
         />
       </div>
 
       <div className="ideMain">
-        {activeFile ? (
+        {loading ? (
+          <div className="aiEmptyState"><p>Loading cloud workspace...</p></div>
+        ) : !token ? (
+          <div className="aiEmptyState"><p>Sign in to access your cloud workspace</p></div>
+        ) : activeFile ? (
             <>
                 <div className="editorTabs">
                     <div className={`tab active`}>
@@ -234,12 +358,96 @@ export default function IDEPage() {
                 </div>
             </>
         ) : (
-            <div className="aiEmptyState"><p>Select a file to start coding</p></div>
+            <div className="aiEmptyState"><p>Create or select a file to start coding</p></div>
         )}
       </div>
     </div>
   );
 }
+
+const findNodeById = (nodes, id) => {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    if (node.isFolder && Array.isArray(node.items)) {
+      const found = findNodeById(node.items, id);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+const updateNodeById = (nodes, id, updater) => {
+  if (!id) return nodes;
+  return nodes.map((node) => {
+    if (node.id === id) return updater(node);
+    if (node.isFolder && Array.isArray(node.items)) {
+      return { ...node, items: updateNodeById(node.items, id, updater) };
+    }
+    return node;
+  });
+};
+
+const deleteNodeRecursive = (nodes, targetId) => {
+  return nodes
+    .filter((node) => node.id !== targetId)
+    .map((node) => {
+      if (node.isFolder && Array.isArray(node.items)) {
+        return { ...node, items: deleteNodeRecursive(node.items, targetId) };
+      }
+      return node;
+    });
+};
+
+const buildFileTree = async (dirHandle) => {
+  const entries = [];
+  for await (const entry of dirHandle.values()) {
+    const id = crypto.randomUUID();
+    if (entry.kind === 'file') {
+      const file = await entry.getFile();
+      const content = await file.text();
+      entries.push({
+        id,
+        name: entry.name,
+        isFolder: false,
+        content,
+        language: detectLanguage(entry.name),
+      });
+    } else if (entry.kind === 'directory') {
+      entries.push({
+        id,
+        name: entry.name,
+        isFolder: true,
+        items: await buildFileTree(entry),
+      });
+    }
+  }
+  return entries;
+};
+
+const sortTree = (nodes) => {
+  return [...nodes]
+    .map((node) => {
+      if (node.isFolder && Array.isArray(node.items)) {
+        return { ...node, items: sortTree(node.items) };
+      }
+      return node;
+    })
+    .sort((a, b) => {
+      if (a.isFolder === b.isFolder) return a.name.localeCompare(b.name);
+      return a.isFolder ? -1 : 1;
+    });
+};
+
+const findFirstFile = (nodes) => {
+  for (const node of nodes) {
+    if (!node.isFolder) return node;
+    if (node.isFolder && Array.isArray(node.items)) {
+      const child = findFirstFile(node.items);
+      if (child) return child;
+    }
+  }
+  return null;
+};
 
 // Helpers
 const detectLanguage = (name) => {

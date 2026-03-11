@@ -22,16 +22,15 @@ const generatefile = async (format, content) => {
 const executepy = (filepath) => {
     return new Promise((resolve, reject) => {
         // ✅ Run python3 directly on the absolute path of the generated file
-        exec(`python3 "${filepath}"`, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-                return;
-            }
-            if (stderr) {
-                reject(stderr);
-                return;
-            }
-            resolve(stdout);
+        // Use the full absolute path so Python can always find the file
+        // Wrap in quotes to handle spaces in Windows paths (e.g. OneDrive)
+        exec(`python3 "${filepath}"`, { timeout: 10000 }, (error, stdout, stderr) => {
+            // Clean up temp file after execution
+            fs.unlink(filepath, () => { });
+
+            if (error) reject(error.message || error.toString());
+            else if (stderr) reject(stderr);
+            else resolve(stdout);
         });
     });
 };

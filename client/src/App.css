@@ -1003,6 +1003,7 @@ html[data-theme="light"] .themeToggle:hover {
 .explorerTree {
   flex: 1;
   overflow-y: auto;
+  position: relative;
 }
 
 .explorerItem {
@@ -1026,6 +1027,55 @@ html[data-theme="light"] .themeToggle:hover {
   background: rgba(88, 166, 255, 0.2);
   color: var(--text-primary);
   border-left-color: var(--accent-blue);
+}
+
+.explorerDeleteBtn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  padding: 2px;
+  opacity: 0.75;
+}
+
+.explorerDeleteBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 1;
+}
+
+.explorerContextMenu {
+  position: fixed;
+  z-index: 1200;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-secondary) 92%, black 8%);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.explorerContextMenuItem {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.explorerContextMenuItem:hover {
+  background: rgba(88, 166, 255, 0.14);
 }
 
 .folderName, .fileName {
@@ -1076,6 +1126,42 @@ html[data-theme="light"] .themeToggle:hover {
     color: var(--text-primary);
     font-size: 0.85rem;
     min-width: 120px;
+    cursor: pointer;
+}
+
+.tab:not(.active) {
+    background: var(--bg-secondary);
+    border-top-color: transparent;
+    color: var(--text-secondary);
+}
+
+.tab.active {
+    background: var(--bg-primary);
+    border-top-color: var(--accent-blue);
+    color: var(--text-primary);
+}
+
+.tabDirtyDot {
+  color: #e6b450;
+  font-size: 0.8rem;
+  margin-left: 2px;
+}
+
+.tabCloseBtn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.tabCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .tabActions {
@@ -1110,6 +1196,29 @@ html[data-theme="light"] .themeToggle:hover {
   align-items: center;
   gap: 10px;
   padding-right: 10px;
+}
+
+.syncBadge {
+  font-size: 0.72rem;
+  letter-spacing: 0.2px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+}
+
+.sync-saving {
+  color: #f9c859;
+  border-color: rgba(249, 200, 89, 0.35);
+}
+
+.sync-synced {
+  color: #78dba9;
+  border-color: rgba(120, 219, 169, 0.35);
+}
+
+.sync-error {
+  color: #ff8b8b;
+  border-color: rgba(255, 139, 139, 0.35);
 }
 
 .ideIconBtn {

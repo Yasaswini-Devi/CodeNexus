@@ -1,15 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { generatefile, executepy } = require('../utils/pythonCompiler');
+const multer = require('multer');
+const { executePythonJob } = require('../utils/pythonCompiler');
 
-router.post('/', async (req, res) => {
-    const { code } = req.body;
-    if (!code) return res.status(400).json({ error: "No code provided" });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024,
+        files: 10,
+    },
+});
+
+router.post('/', upload.array('files', 10), async (req, res) => {
+    const code = req.body?.code;
+    if (!code) return res.status(400).json({ error: 'No code provided' });
 
     try {
-        const filePath = await generatefile('py', code);
-        const output = await executepy(filePath);
-        res.json({ output });
+        const { output, visualizations } = await executePythonJob({
+            code,
+            files: req.files || [],
+        });
+
+        res.json({ output, visualizations });
     } catch (err) {
         res.status(500).json({ error: err.toString() });
     }

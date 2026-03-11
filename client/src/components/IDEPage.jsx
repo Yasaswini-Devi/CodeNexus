@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import FileExplorer from './FileExplorer';
 import CodeEditor from './CodeEditor';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
-import { VscTrash } from 'react-icons/vsc';
+import { VscClose, VscTrash } from 'react-icons/vsc';
 import { useAuth } from '../context/AuthContext';
 
 const PROJECTS_API = 'http://localhost:5001/api/projects';
@@ -17,6 +17,10 @@ export default function IDEPage() {
   const [loading, setLoading] = useState(true);
   const [projectId, setProjectId] = useState(null);
   const [projectTitle, setProjectTitle] = useState('IDE Workspace');
+  const [openTabIds, setOpenTabIds] = useState([]);
+  const [dirtyFileIds, setDirtyFileIds] = useState([]);
+  const [syncStatus, setSyncStatus] = useState('synced');
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -60,6 +64,10 @@ export default function IDEPage() {
           setActiveFile(null);
           setProjectId(null);
           setProjectTitle('IDE Workspace');
+          setOpenTabIds([]);
+          setDirtyFileIds([]);
+          setSyncStatus('synced');
+          setSelectedNodeId(null);
           initializedRef.current = true;
           return;
         }
@@ -78,6 +86,10 @@ export default function IDEPage() {
 
         const selected = project?.activeFileId ? findNodeById(tree, project.activeFileId) : null;
         setActiveFile(selected && !selected.isFolder ? selected : null);
+        setOpenTabIds(selected && !selected.isFolder ? [selected.id] : []);
+        setDirtyFileIds([]);
+        setSyncStatus('synced');
+        setSelectedNodeId(selected?.id || null);
 
         initializedRef.current = true;
       } catch (err) {
@@ -90,56 +102,98 @@ export default function IDEPage() {
     loadProject();
   }, [token]);
 
-  useEffect(() => {
-    if (!token || !initializedRef.current) return;
+  const saveWorkspace = useCallback(async () => {
+    if (!token || !initializedRef.current) return false;
 
-    const timer = setTimeout(async () => {
-      try {
-        if (files.length === 0 && !projectId) return;
+    try {
+      if (files.length === 0 && !projectId) {
+        setSyncStatus('synced');
+        return true;
+      }
 
-        if (projectId) {
-          await fetch(`${PROJECTS_API}/${projectId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              title: projectTitle,
-              tree: files,
-              activeFileId: activeFile?.id || null,
-              language: 'ide',
-            }),
-          });
-          return;
-        }
+      setSyncStatus('saving');
 
-        const titleFromTree = files[0]?.name ? `${files[0].name}` : `IDE Workspace - ${new Date().toLocaleDateString('en-IN')}`;
-        const res = await fetch(PROJECTS_API, {
-          method: 'POST',
+      if (projectId) {
+        await fetch(`${PROJECTS_API}/${projectId}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            title: titleFromTree,
-            language: 'ide',
+            title: projectTitle,
             tree: files,
             activeFileId: activeFile?.id || null,
+            language: 'ide',
           }),
         });
-        const data = await res.json();
-        if (res.ok && data.project) {
-          setProjectId(data.project._id);
-          setProjectTitle(data.project.title || titleFromTree);
-        }
-      } catch {
+        setDirtyFileIds([]);
+        setSyncStatus('synced');
+        return true;
+      }
+
+      const titleFromTree = files[0]?.name ? `${files[0].name}` : `IDE Workspace - ${new Date().toLocaleDateString('en-IN')}`;
+      const res = await fetch(PROJECTS_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: titleFromTree,
+          language: 'ide',
+          tree: files,
+          activeFileId: activeFile?.id || null,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.project) {
+        setProjectId(data.project._id);
+        setProjectTitle(data.project.title || titleFromTree);
+      }
+      setDirtyFileIds([]);
+      setSyncStatus('synced');
+      return true;
+    } catch {
+      setSyncStatus('error');
+      return false;
+    }
+  }, [token, files, projectId, projectTitle, activeFile?.id]);
+
+  useEffect(() => {
+    if (!token || !initializedRef.current) return;
+
+    const timer = setTimeout(async () => {
+      const ok = await saveWorkspace();
+      if (!ok) {
         toast.error('Failed to autosave IDE project');
       }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [files, activeFile?.id, token, projectId, projectTitle]);
+  }, [files, activeFile?.id, token, projectId, projectTitle, saveWorkspace]);
+
+  useEffect(() => {
+    const onKeyDown = async (event) => {
+      const isMetaSave = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's';
+      const isMetaClose = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'w';
+
+      if (isMetaSave) {
+        event.preventDefault();
+        const ok = await saveWorkspace();
+        if (ok) toast.success('Saved');
+        else toast.error('Save failed');
+      }
+
+      if (isMetaClose && activeFile) {
+        event.preventDefault();
+        handleCloseTab(activeFile.id);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeFile, saveWorkspace]);
 
   const handleOpenFolder = async () => {
     if (!user || !token) {
@@ -154,7 +208,12 @@ export default function IDEPage() {
       const sortedTree = sortTree(tree);
       setProjectId(null);
       setFiles(sortedTree);
-      setActiveFile(findFirstFile(sortedTree));
+      const firstFile = findFirstFile(sortedTree);
+      setActiveFile(firstFile);
+      setOpenTabIds(firstFile ? [firstFile.id] : []);
+      setDirtyFileIds([]);
+      setSyncStatus('saving');
+      setSelectedNodeId(firstFile?.id || null);
       setProjectTitle(dirHandle.name || 'IDE Workspace');
       toast.dismiss();
       toast.success(`Opened ${dirHandle.name} and autosaving to cloud`);
@@ -166,14 +225,22 @@ export default function IDEPage() {
     }
   };
 
-  const handleSelectFile = async (fileNode) => {
-    if (fileNode.isFolder) return;
+  const handleSelectNode = async (node) => {
+    setSelectedNodeId(node.id);
+    if (node.isFolder) return;
+
     setOutput("");
     setShowPreview(false);
-    setActiveFile({ ...fileNode, content: fileNode.content || '' });
+    setActiveFile({ ...node, content: node.content || '' });
+    setOpenTabIds(prev => (prev.includes(node.id) ? prev : [...prev, node.id]));
   };
 
-  const handleCreateFile = () => {
+  const getSelectedFolder = () => {
+    const selectedNode = selectedNodeId ? findNodeById(files, selectedNodeId) : null;
+    return selectedNode?.isFolder ? selectedNode : null;
+  };
+
+  const handleCreateFile = (targetFolder = null) => {
     if (!user || !token) {
       toast.error('Please sign in to use cloud workspace');
       return;
@@ -181,11 +248,15 @@ export default function IDEPage() {
     const name = prompt("Enter file name (e.g. script.js):");
     if (!name) return;
     const newFile = { id: crypto.randomUUID(), name, isFolder: false, content: "", language: detectLanguage(name) };
-    setFiles(prev => [...prev, newFile]);
+    setFiles(prev => addNodeToFolder(prev, targetFolder?.id || null, newFile));
     setActiveFile(newFile);
+    setSelectedNodeId(newFile.id);
+    setOpenTabIds(prev => (prev.includes(newFile.id) ? prev : [...prev, newFile.id]));
+    setDirtyFileIds(prev => (prev.includes(newFile.id) ? prev : [...prev, newFile.id]));
+    setSyncStatus('saving');
   };
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = (targetFolder = null) => {
     if (!user || !token) {
       toast.error('Please sign in to use cloud workspace');
       return;
@@ -193,20 +264,72 @@ export default function IDEPage() {
     const name = prompt("Enter folder name:");
     if (!name) return;
     const newFolder = { id: crypto.randomUUID(), name, isFolder: true, items: [] };
-    setFiles(prev => [newFolder, ...prev]);
+    setFiles(prev => addNodeToFolder(prev, targetFolder?.id || null, newFolder));
+    setSelectedNodeId(newFolder.id);
+    setSyncStatus('saving');
   };
 
   const handleCodeChange = (newContent) => {
+    const activeId = activeFile?.id;
+    if (!activeId) return;
+
     setActiveFile(prev => {
       if (!prev) return prev;
       return { ...prev, content: newContent };
     });
 
-    setFiles(prev => updateNodeById(prev, activeFile?.id, (node) => ({
+    setFiles(prev => updateNodeById(prev, activeId, (node) => ({
       ...node,
       content: newContent,
       language: node.language || detectLanguage(node.name),
     })));
+    setDirtyFileIds(prev => (prev.includes(activeId) ? prev : [...prev, activeId]));
+    setSyncStatus('saving');
+  };
+
+  const handleRename = (targetNode) => {
+    if (!targetNode) return;
+    const nextName = prompt('Rename to:', targetNode.name);
+    if (!nextName || nextName === targetNode.name) return;
+
+    setFiles(prev => updateNodeById(prev, targetNode.id, (node) => ({
+      ...node,
+      name: nextName,
+      ...(node.isFolder ? {} : { language: detectLanguage(nextName) }),
+    })));
+
+    if (activeFile?.id === targetNode.id) {
+      setActiveFile(prev => prev ? ({
+        ...prev,
+        name: nextName,
+        language: detectLanguage(nextName),
+      }) : prev);
+    }
+
+    if (selectedNodeId === targetNode.id) {
+      setSelectedNodeId(targetNode.id);
+    }
+
+    if (!targetNode.isFolder) {
+      setDirtyFileIds(prev => (prev.includes(targetNode.id) ? prev : [...prev, targetNode.id]));
+    }
+    setSyncStatus('saving');
+    toast.success('Renamed');
+  };
+
+  const handleCloseTab = (fileId) => {
+    const isActiveClosing = activeFile?.id === fileId;
+
+    setOpenTabIds(prev => {
+      const remaining = prev.filter((id) => id !== fileId);
+      if (isActiveClosing) {
+        const nextId = remaining[remaining.length - 1];
+        const nextNode = nextId ? findNodeById(files, nextId) : null;
+        setActiveFile(nextNode && !nextNode.isFolder ? { ...nextNode, content: nextNode.content || '' } : null);
+        setSelectedNodeId(nextNode?.id || null);
+      }
+      return remaining;
+    });
   };
 
   const handleDelete = (targetNode = activeFile) => {
@@ -214,11 +337,21 @@ export default function IDEPage() {
     if (!window.confirm(`Delete ${targetNode.name}?`)) return;
 
     setFiles(prev => deleteNodeRecursive(prev, targetNode.id));
+    setOpenTabIds(prev => prev.filter((id) => id !== targetNode.id));
+    setDirtyFileIds(prev => prev.filter((id) => id !== targetNode.id));
+    if (selectedNodeId === targetNode.id) {
+      setSelectedNodeId(null);
+    }
     if (activeFile && targetNode.id === activeFile.id) {
         setActiveFile(null);
     }
+    setSyncStatus('saving');
     toast.success("Deleted");
   };
+
+  const openTabs = openTabIds
+    .map((id) => findNodeById(files, id))
+    .filter((node) => node && !node.isFolder);
 
   // ✅ UPDATED RUN: Captures JS Console Logic
   const handleRun = async () => {
@@ -298,12 +431,14 @@ export default function IDEPage() {
       <div className="ideSidebar">
         <FileExplorer 
           files={files} 
-          onSelectFile={handleSelectFile} 
+          onSelectFile={handleSelectNode} 
           activeFile={activeFile}
+          selectedNodeId={selectedNodeId}
           onOpenFolder={handleOpenFolder}
-          onCreateFile={handleCreateFile}
-          onCreateFolder={handleCreateFolder}
+          onCreateFile={() => handleCreateFile(getSelectedFolder())}
+          onCreateFolder={() => handleCreateFolder(getSelectedFolder())}
           onDeleteItem={handleDelete}
+          onRenameItem={handleRename}
         />
       </div>
 
@@ -315,11 +450,35 @@ export default function IDEPage() {
         ) : activeFile ? (
             <>
                 <div className="editorTabs">
-                    <div className={`tab active`}>
-                        {getFileIcon(activeFile.name)} 
-                        <span>{activeFile.name}</span>
-                    </div>
+                    {openTabs.map((tabFile) => {
+                      const isActive = activeFile?.id === tabFile.id;
+                      const isDirty = dirtyFileIds.includes(tabFile.id);
+                      return (
+                        <div
+                          key={tabFile.id}
+                          className={`tab ${isActive ? 'active' : ''}`}
+                          onClick={() => handleSelectNode(tabFile)}
+                        >
+                          {getFileIcon(tabFile.name)}
+                          <span>{tabFile.name}</span>
+                          {isDirty && <span className="tabDirtyDot">●</span>}
+                          <button
+                            className="tabCloseBtn"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleCloseTab(tabFile.id);
+                            }}
+                            title="Close"
+                          >
+                            <VscClose />
+                          </button>
+                        </div>
+                      );
+                    })}
                     <div className="tabActions">
+                        <span className={`syncBadge sync-${syncStatus}`}>
+                          {syncStatus === 'saving' ? 'Saving...' : syncStatus === 'error' ? 'Save error' : 'Synced'}
+                        </span>
                         <button onClick={() => handleDelete(activeFile)} className="ideIconBtn danger" title="Delete">
                             <VscTrash />
                         </button>
@@ -396,6 +555,30 @@ const deleteNodeRecursive = (nodes, targetId) => {
       }
       return node;
     });
+};
+
+const addNodeToFolder = (nodes, folderId, newNode) => {
+  if (!folderId) {
+    return sortTree([newNode, ...nodes]);
+  }
+
+  return nodes.map((node) => {
+    if (node.id === folderId && node.isFolder) {
+      return {
+        ...node,
+        items: sortTree([...(node.items || []), newNode]),
+      };
+    }
+
+    if (node.isFolder && Array.isArray(node.items)) {
+      return {
+        ...node,
+        items: addNodeToFolder(node.items, folderId, newNode),
+      };
+    }
+
+    return node;
+  });
 };
 
 const buildFileTree = async (dirHandle) => {

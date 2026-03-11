@@ -16,6 +16,10 @@ function LangList(props) {
                 <div className="languageBorder" style={{'backgroundColor':`${props.leftcolorpy}`}}>
                         <NavLink to="/python">Python</NavLink>
                 </div>
+                {/* ✅ New IDE Link */}
+                <div className="languageBorder" style={{'border': '1px solid #58a6ff'}}>
+                        <NavLink to="/ide">IDE</NavLink>
+                </div>
             </div>
     </div>
     </>

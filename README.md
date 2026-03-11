@@ -56,9 +56,9 @@ npm install
 node server.js
 ```
 
-The server listens on **port 5000** and exposes:
+The server listens on **port 5001** and exposes:
 
-- **`POST http://localhost:5000/runpy`** with JSON body `{ "code": "print('hi')" }`
+- **`POST http://localhost:5001/runpy`** with JSON body `{ "code": "print('hi')" }`
 
 ### 2) Start the client
 
@@ -95,7 +95,7 @@ MODEL_API_URL=http://localhost:8080/api/generate
 
 The server exposes:
 
-- `POST http://localhost:5000/ai` with JSON body `{ "prompt": "Explain this code" }` — the server will proxy your request to `MODEL_API_URL` and return the model output.
+- `POST http://localhost:5001/ai` with JSON body `{ "prompt": "Explain this code" }` — the server will proxy your request to `MODEL_API_URL` and return the model output.
 
 Notes: different model frontends expect different payload shapes. The proxy (`server/utils/aiClient.js`) sends `{ prompt, max_tokens }` and attempts to parse common response shapes. Adjust the proxy logic if your frontend expects a different payload.
 
@@ -147,5 +147,5 @@ The backend executes Python using `python3` in `server/utils/pythonCompiler.js`.
 
 ### CORS / API connection issues
 
-- Client calls the server at `http://localhost:5000/runpy`.
+- Client calls the server at `http://localhost:5001/runpy`.
 - Server CORS currently allows `http://localhost:5173` and `http://localhost:3000`.

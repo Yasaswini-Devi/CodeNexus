@@ -7,6 +7,7 @@ import Html from './components/Html'
 import Python from './components/Python'
 import './App.css'
 import SharePage from "./components/SharePage";
+import IDEPage from './components/IDEPage'; 
 
 function App() {
 
@@ -30,7 +31,8 @@ function App() {
             <Route path="/javascript" element={<Javascript />} />
             <Route path="/python" element={<Python />} />
             <Route path="/html" element={<Html />} />
-	  		<Route path="/share/:id" element={<SharePage />} />
+	  		    <Route path="/share/:id" element={<SharePage />} />
+            <Route path="/ide" element={<IDEPage />} /> 
           </Route>
         </Routes>
       </Router>

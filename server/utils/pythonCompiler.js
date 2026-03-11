@@ -21,12 +21,17 @@ const generatefile = async (format, content) => {
 // Function to execute the .py file
 const executepy = (filepath) => {
     return new Promise((resolve, reject) => {
-        const uniqueName = path.basename(filepath).split(".")[0];
-        const wayName = path.join(__dirname, "../python_runner");
-        exec(`cd ${wayName} && python ${uniqueName}.py`, (error, stdout, stderr) => {
-            if (error) reject(error);
-            else if (stderr) reject(stderr);
-            else resolve(stdout);
+        // ✅ Run python3 directly on the absolute path of the generated file
+        exec(`python3 "${filepath}"`, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            if (stderr) {
+                reject(stderr);
+                return;
+            }
+            resolve(stdout);
         });
     });
 };

@@ -12,7 +12,9 @@ CodeNexus is a lightweight, browser-based coding playground with multiple “edi
 
 - **Client**: React + Vite + React Router + Monaco Editor (`client/`)
 - **Server**: Node.js + Express + CORS + Mongoose (`server/`)
-- **Python execution**: server-side `python3` process (writes files to `server/python_runner/`)
+- **Database**: MongoDB (stores Users and Projects)
+- **Authentication**: JWT & bcryptjs
+- **Python execution**: server-side `python3` process (writes files to `server/temp_codes/` and executes)
 - **AI Assistant**: LLM proxy (supports Ollama and other HTTP-based model APIs)
 
 ## Project structure
@@ -29,15 +31,18 @@ CodeNexus is a lightweight, browser-based coding playground with multiple “edi
   
 - **`server/`**: API backend
   - **`server.js`**: Express app entry point
-  - **`.env`**: Environment variables (API URLs, model configuration)
+  - **`models/`**: MongoDB schemas (`User.js`, `Project.js`)
+  - **`middleware/`**: JWT `auth.js` middleware
+  - **`.env`**: Environment variables (MongoDB URI, JWT Secret, model configuration)
   - **`routes/`**:
+    - **`auth.js`**: Registration, Login, and User Identity
+    - **`projects.js`**: CRUD operations for user's saved code projects
     - **`pythonRoutes.js`**: `POST /runpy` — Execute Python code
-    - **`aiRoutes.js`**: `POST /ai` — Proxy AI requests to configured LLM endpoint
-    - **`mockModel.js`**: `POST /mock-model` — Local mock endpoint for testing
+    - **`aiRoutes.js`**: `POST /ai` — Proxy AI requests
   - **`utils/`**:
-    - **`pythonCompiler.js`**: Creates temp `.py` files and executes them
-    - **`aiClient.js`**: Proxies prompts to external model API (Ollama, etc.)
-  - **`python_runner/`**: Auto-created folder holding generated `.py` files
+    - **`pythonCompiler.js`**: Creates temp `.py` files, executes them, and cleans up
+    - **`aiClient.js`**: Proxies prompts to external model API
+  - **`temp_codes/`**: Auto-created folder holding transient generated `.py` files
 
 ## Requirements
 
@@ -56,9 +61,14 @@ npm install
 node server.js
 ```
 
-The server listens on **port 5000** and exposes:
+The server listens on **port 5001** and exposes:
 
-- **`POST http://localhost:5000/runpy`** with JSON body `{ "code": "print('hi')" }`
+- **`POST http://localhost:5001/runpy`** with JSON body `{ "code": "print('hi')" }`
+<<<<<<< HEAD
+=======
+- **`POST http://localhost:5001/api/auth/login`** for authentication
+- **`GET http://localhost:5001/api/projects`** for saved projects
+>>>>>>> 21827fab6e72321aabbf67436a265252a7c7c0c8
 
 ### 2) Start the client
 
@@ -73,10 +83,13 @@ Open the Vite dev URL (typically **`http://localhost:5173`**).
 
 ## New features added
 
-- **Client-Side Routing**: Added `react-router-dom` to support navigation between the Landing Page and individual language playgrounds (e.g., `/javascript`, `/python`).
+- **User Authentication**: Secure JWT-based login and registration system. Users stay logged in (in-memory sessions) while using the app. Protected routes ensure unauthorized users cannot access the editors or dashboard.
+- **Cloud Projects Storage & Custom Naming**: Save code to MongoDB. The editor top-bar features an inline editable text input to give projects custom names (or keep the smart auto-generated defaults).
+- **Dashboard ("My Projects")**: A grid view of all your saved projects. Click "Open" to jump back into a project exactly where you left off, or instantly delete old projects.
+- **Client-Side Routing**: Added `react-router-dom` to support navigation between the Landing Page, Dashboard, and individual language playgrounds.
 - **Monaco editor**: Textareas were replaced with the Monaco editor for a much richer editing experience (syntax highlighting, line numbers, word wrap).
 - **Theme switcher**: Toggle light/dark themes using the `Theme` button in the top-right. Theme preference is persisted to `localStorage`.
-- **AI Assistant (experimental)**: An AI assistant panel is available (click the `AI Assist` button in any editor or open it via the top-right assistant). It sends prompts to a configurable model API running separately and displays the model's response.
+- **UI Architecture**: Glassmorphism styling, clean React Portals for UI overlays, and `react-hot-toast` for fluid user feedback.
 
 ## AI Assistant setup (open-source models)
 
@@ -95,7 +108,7 @@ MODEL_API_URL=http://localhost:8080/api/generate
 
 The server exposes:
 
-- `POST http://localhost:5000/ai` with JSON body `{ "prompt": "Explain this code" }` — the server will proxy your request to `MODEL_API_URL` and return the model output.
+- `POST http://localhost:5001/ai` with JSON body `{ "prompt": "Explain this code" }` — the server will proxy your request to `MODEL_API_URL` and return the model output.
 
 Notes: different model frontends expect different payload shapes. The proxy (`server/utils/aiClient.js`) sends `{ prompt, max_tokens }` and attempts to parse common response shapes. Adjust the proxy logic if your frontend expects a different payload.
 
@@ -147,5 +160,11 @@ The backend executes Python using `python3` in `server/utils/pythonCompiler.js`.
 
 ### CORS / API connection issues
 
-- Client calls the server at `http://localhost:5000/runpy`.
+<<<<<<< HEAD
+- Client calls the server at `http://localhost:5001/runpy`.
 - Server CORS currently allows `http://localhost:5173` and `http://localhost:3000`.
+=======
+- Client calls the server at `http://localhost:5001`.
+- Server uses `cors({ origin: true, credentials: true })` by default during local development to prevent origin mismatch blocks between `localhost` and `127.0.0.1`.
+- If dashboard projects are not loading, ensure MongoDB is running and `MONGO_URI` is correctly set in `server/.env`.
+>>>>>>> 21827fab6e72321aabbf67436a265252a7c7c0c8

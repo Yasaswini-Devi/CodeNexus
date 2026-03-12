@@ -1,7 +1,9 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
-import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import AIAssistant from './AIAssistant';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 function ThemeToggle() {
   const [theme, setTheme] = useState(localStorage.getItem('cn_theme') || 'light');
@@ -39,21 +41,112 @@ function TopNavLink({ to, children, end }) {
   )
 }
 
+
+function UserMenu() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (
+        !btnRef.current?.contains(e.target) &&
+        !dropdownRef.current?.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  if (!user) {
+    return (
+      <NavLink
+        to="/login"
+        className={({ isActive }) => `topNavLink${isActive ? ' isActive' : ''}`}
+        id="navLoginLink"
+      >
+        Sign In
+      </NavLink>
+    );
+  }
+
+  const initials = user.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : user.email.slice(0, 2).toUpperCase();
+
+  const handleOpen = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setDropPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setOpen(o => !o);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate('/login');
+    toast.success('Signed out');
+  };
+
+  const dropdown = (
+    <div
+      ref={dropdownRef}
+      className="userDropdown"
+      id="userDropdown"
+      style={{ position: 'fixed', top: dropPos.top, right: dropPos.right, zIndex: 9999 }}
+    >
+      <div className="userDropdownName">{user.username}</div>
+      <div className="userDropdownEmail">{user.email}</div>
+      <hr className="userDropdownDivider" />
+      <button
+        className="userDropdownItem"
+        onClick={() => { setOpen(false); navigate('/dashboard'); }}
+        id="navDashboardBtn"
+      >
+        📂 My Projects
+      </button>
+      <button
+        className="userDropdownItem userDropdownLogout"
+        onClick={handleLogout}
+        id="navLogoutBtn"
+      >
+        🚪 Sign Out
+      </button>
+    </div>
+  );
+
+  return (
+    <div ref={btnRef} style={{ display: 'inline-block', position: 'relative' }}>
+      <button
+        className="userAvatar"
+        onClick={handleOpen}
+        title={user.username || user.email}
+        id="userAvatarBtn"
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        {initials}
+      </button>
+      {open && createPortal(dropdown, document.body)}
+    </div>
+  );
+}
+
+
 export default function AppLayout({ theme, setTheme }) {
   return (
     <div className="appRoot">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 2600,
-          style: {
-            background: 'rgba(22, 27, 34, 0.92)',
-            color: '#e6edf3',
-            border: '1px solid rgba(48, 54, 61, 0.7)',
-            backdropFilter: 'blur(10px)',
-          },
-        }}
-      />
       <header className="topNav">
         <div className="topNavInner">
           <div className="topNavLeft">
@@ -72,6 +165,9 @@ export default function AppLayout({ theme, setTheme }) {
             <div style={{ display: 'inline-block', marginLeft: 12 }}>
               <ThemeToggle />
             </div>
+            <div style={{ display: 'inline-block', marginLeft: 8 }}>
+              <UserMenu />
+            </div>
           </nav>
         </div>
       </header>
@@ -82,4 +178,3 @@ export default function AppLayout({ theme, setTheme }) {
     </div>
   )
 }
-

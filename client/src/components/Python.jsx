@@ -1,67 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LangList from './LangList';
 import { toast } from 'react-hot-toast';
 import CodeEditor from './CodeEditor';
-
+import { useSaveProject } from '../hooks/useSaveProject';
 
 function Python() {
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
-  const [plots, setPlots] = useState([]);
+  const [visualizations, setVisualizations] = useState([]);
+  const { saveProject, saving, loadedCode, projectTitle, setProjectTitle } = useSaveProject({ code, language: 'python' });
+
+  useEffect(() => { if (loadedCode !== null) setCode(loadedCode); }, [loadedCode]);
 
   const handleSubmit = async () => {
     toast.loading('Please Wait while File is Executing.');
-    const payload = {
-      language: "py",
-      code
-    };
+    const payload = { language: "py", code };
 
     try {
-      const response = await fetch("http://localhost:5000/runpy", {
+      const response = await fetch("http://localhost:5001/runpy", {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (response.ok) {
         toast.remove();
         setOutput(data.output);
-		setPlots(data.plots || []);
+        setVisualizations(data.visualizations || []);
         toast.success("Executed Successfully.");
       } else {
-        setOutput(data.error);
+        setOutput(data.error || "Error occurred");
         toast.remove();
-        toast.error("An error occured.");
+        toast.error("Execution Failed");
       }
     } catch (err) {
       toast.remove();
       setOutput("Error in communication with server");
     }
-  }
+  };
 
   const handleShare = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/share", {
+      const response = await fetch("http://localhost:5001/api/share", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: code,
-          language: "python",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, language: "python" }),
       });
-
       const data = await response.json();
-
       const shareLink = `${window.location.origin}/share/${data.id}`;
-
       await navigator.clipboard.writeText(shareLink);
-
       toast.success("Share link copied!");
     } catch (err) {
       console.error(err);
@@ -70,25 +59,24 @@ function Python() {
   };
 
   const clear = () => {
-    toast.success('Output Cleared')
+    toast.success('Output Cleared');
     setOutput('');
-	setPlots([]);
-  }
+    setVisualizations([]);
+  };
 
   const copyContent = () => {
-    toast.success("Copied")
+    toast.success("Copied");
     navigator.clipboard.writeText(code);
-  }
+  };
 
   const codeToFile = () => {
-    toast.success('File is Downloading...')
+    toast.success('File is Downloading...');
     const blob = new Blob([code], { type: "text/python" });
-
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
     link.download = "codofile-python.py";
     link.click();
-  }
+  };
 
   return (
     <>
@@ -100,12 +88,21 @@ function Python() {
           <div className="PlaygroundMain">
             <div className='runHeaderJS'>
               <div className='jsleftheaderfile jsfile'>
-                <mark><h2>index.py</h2></mark>
+                <mark>
+                  <input
+                    type="text"
+                    className="projectTitleInput"
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    placeholder="Project Name..."
+                  />
+                </mark>
                 <div className='runbtn'>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button className='copyDownloadBtn' title='Copy code' onClick={copyContent}>📋 Copy</button>
                     <button className='copyDownloadBtn' title='Download code' onClick={codeToFile}>⬇️ Download</button>
                     <button className='copyDownloadBtn' title='Share code' onClick={handleShare}>🔗 Share</button>
+                    <button className='copyDownloadBtn saveBtn' title='Save project' onClick={() => saveProject(code)} disabled={saving}>{saving ? '…' : '💾 Save'}</button>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                     <button className='btn' onClick={handleSubmit}>RUN</button>
@@ -124,47 +121,30 @@ function Python() {
                   <CodeEditor language="python" value={code} onChange={setCode} />
                 </div>
               </div>
-              <h1 className="invisible">
-                <mark>Output</mark>
-              </h1>
+              <h1 className="invisible"><mark>Output</mark></h1>
               <div className='rightplayground snippet' id='consoleOutput'>
-  <p>{output}</p>
-  {plots && plots.map((plot, i) => (
-    <div key={i} style={{ marginTop: '12px' }}>
-      {plot.type === 'matplotlib' && (
-       	<div>
-		  <img
-          src={`data:image/png;base64,${plot.data}`}
-          alt={`Plot ${i + 1}`}
-          style={{ maxWidth: '100%', borderRadius: '8px' }}
-        />
-		  <a href={`data:image/png;base64,${plot.data}`} download={`plot_${i + 1}.png`}>
-            <button className='copyDownloadBtn' style={{ marginTop: '8px' }}>⬇️ Download Plot</button>
-          </a>
-        </div>
-      )}
-      {plot.type === 'plotly' && (
-		<div>
-        <iframe
-          srcDoc={plot.data}
-          style={{ width: '100%', height: '500px', border: 'none', background: '#fff', borderRadius: '8px' }}
-          title={`Plotly Chart ${i + 1}`}
-          sandbox="allow-scripts"
-        />
-		  <a href={`data:text/html;charset=utf-8,${encodeURIComponent(plot.data)}`} download={`plotly_chart_${i + 1}.html`}>
-            <button className='copyDownloadBtn' style={{ marginTop: '8px' }}>⬇️ Download Chart</button>
-          </a>
-        </div>
-      )}
-    </div>
-  ))}
-</div>
+                <p>{output}</p>
+                {visualizations && visualizations.map((viz, i) => (
+                  <div key={i} style={{ marginTop: '12px' }}>
+                    <img
+                      src={viz.dataUrl}
+                      alt={viz.name}
+                      style={{ maxWidth: '100%', borderRadius: '8px' }}
+                    />
+                    <a href={viz.dataUrl} download={viz.name}>
+                      <button className='copyDownloadBtn' style={{ marginTop: '8px' }}>
+                        ⬇️ Download Plot
+                      </button>
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default Python
+export default Python;

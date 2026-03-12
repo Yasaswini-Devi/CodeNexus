@@ -1,0 +1,267 @@
+/* ── Dashboard ────────────────────────────────────────────────────────────── */
+
+.dashRoot {
+    padding: 40px 32px 64px;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: calc(100vh - 64px);
+}
+
+/* Header */
+.dashHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.dashTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--cn-text, #e2e8f0);
+    margin: 0 0 4px;
+}
+
+.dashSub {
+    font-size: 0.87rem;
+    color: rgba(148, 163, 184, 0.65);
+    margin: 0;
+}
+
+.dashHeaderBtns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dashNewBtn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.dashNewBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+/* Grid */
+.dashGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 20px;
+}
+
+/* Card */
+.dashCard {
+    background: rgba(22, 27, 40, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.dashCard:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+}
+
+.dashCardTop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashCardLangIcon {
+    font-size: 1.3rem;
+}
+
+.dashCardLangBadge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.dashCardLangBadge--javascript {
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+}
+
+.dashCardLangBadge--python {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.dashCardLangBadge--html {
+    background: rgba(251, 113, 33, 0.15);
+    color: #fb923c;
+}
+
+.dashCardTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cn-text, #e2e8f0);
+    margin: 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashCardDate {
+    font-size: 0.78rem;
+    color: rgba(148, 163, 184, 0.5);
+    margin: 0;
+}
+
+.dashCardActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.dashCardOpen {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(99, 102, 241, 0.14);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    color: #a5b4fc;
+    font-weight: 600;
+    font-size: 0.84rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.dashCardOpen:hover {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: rgba(99, 102, 241, 0.6);
+}
+
+.dashCardDelete {
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    color: #f87171;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.dashCardDelete:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.dashCardDelete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading */
+.dashLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 80px 0;
+    color: rgba(148, 163, 184, 0.6);
+}
+
+.dashSpinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(99, 102, 241, 0.2);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.dashEmpty {
+    text-align: center;
+    padding: 80px 24px;
+    color: rgba(148, 163, 184, 0.65);
+}
+
+.dashEmptyIcon {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+}
+
+.dashEmpty h2 {
+    font-size: 1.4rem;
+    color: var(--cn-text, #e2e8f0);
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.dashEmpty p {
+    margin: 0 0 28px;
+    font-size: 0.92rem;
+}
+
+.dashEmptyActions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.dashEmptyBtn {
+    padding: 10px 20px;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    border-radius: 10px;
+    color: #a5b4fc;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.dashEmptyBtn:hover {
+    background: rgba(99, 102, 241, 0.22);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .dashRoot {
+        padding: 24px 16px 48px;
+    }
+
+    .dashTitle {
+        font-size: 1.5rem;
+    }
+}

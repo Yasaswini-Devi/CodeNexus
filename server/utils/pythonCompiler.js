@@ -20,10 +20,15 @@ const executepy = (filepath) => {
     return new Promise((resolve, reject) => {
         const uniqueName = path.basename(filepath).split(".")[0];
         const wayName = path.join(__dirname, "../python_runner");
-        exec(`cd ${wayName} && python ${uniqueName}.py`, (error, stdout, stderr) => {
-            if (error) reject(error);
-            else if (stderr) reject(stderr);
-            else resolve(stdout);
+        const wrapper = path.join(__dirname, "../python_runner/plot_wrapper.py");
+exec(`cd ${wayName} && python3 ${wrapper} ${uniqueName}.py`, (error, stdout, stderr) => {
+    if (error) return reject(error);
+    try {
+        const result = JSON.parse(stdout);
+        resolve(result);
+    } catch {
+        reject(new Error(stderr || stdout || 'Unknown error'));
+    }
         });
     });
 };

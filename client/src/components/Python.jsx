@@ -8,6 +8,7 @@ function Python() {
 
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
+  const [plots, setPlots] = useState([]);
 
   const handleSubmit = async () => {
     toast.loading('Please Wait while File is Executing.');
@@ -29,6 +30,7 @@ function Python() {
       if (response.ok) {
         toast.remove();
         setOutput(data.output);
+		setPlots(data.plots || []);
         toast.success("Executed Successfully.");
       } else {
         setOutput(data.error);
@@ -70,6 +72,7 @@ function Python() {
   const clear = () => {
     toast.success('Output Cleared')
     setOutput('');
+	setPlots([]);
   }
 
   const copyContent = () => {
@@ -124,9 +127,38 @@ function Python() {
               <h1 className="invisible">
                 <mark>Output</mark>
               </h1>
-              <div className='rightplayground snippet' id='consoleOutput' >
-                <p>{output}</p>
-              </div>
+              <div className='rightplayground snippet' id='consoleOutput'>
+  <p>{output}</p>
+  {plots && plots.map((plot, i) => (
+    <div key={i} style={{ marginTop: '12px' }}>
+      {plot.type === 'matplotlib' && (
+       	<div>
+		  <img
+          src={`data:image/png;base64,${plot.data}`}
+          alt={`Plot ${i + 1}`}
+          style={{ maxWidth: '100%', borderRadius: '8px' }}
+        />
+		  <a href={`data:image/png;base64,${plot.data}`} download={`plot_${i + 1}.png`}>
+            <button className='copyDownloadBtn' style={{ marginTop: '8px' }}>⬇️ Download Plot</button>
+          </a>
+        </div>
+      )}
+      {plot.type === 'plotly' && (
+		<div>
+        <iframe
+          srcDoc={plot.data}
+          style={{ width: '100%', height: '500px', border: 'none', background: '#fff', borderRadius: '8px' }}
+          title={`Plotly Chart ${i + 1}`}
+          sandbox="allow-scripts"
+        />
+		  <a href={`data:text/html;charset=utf-8,${encodeURIComponent(plot.data)}`} download={`plotly_chart_${i + 1}.html`}>
+            <button className='copyDownloadBtn' style={{ marginTop: '8px' }}>⬇️ Download Chart</button>
+          </a>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
             </div>
           </div>
         </div>
